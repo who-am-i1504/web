@@ -24,6 +24,7 @@
     "clipboard-polyfill": "^2.8.6",
     "core-js": "^3.4.3",
     "countup.js": "^2.0.4",
+    "d2-crud-x": "^2.4.4",
     "dayjs": "^1.8.17",
     "echarts": "^4.5.0",
     "element-ui": "^2.13.0",

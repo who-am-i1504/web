@@ -31,6 +31,7 @@ export default {
     //     return '通过scope拿到了当前行日期：' + this.scope.row.date
     //   }
     //   return this.value ? '是' : '否'
+    // console.log(scope)
         return this.scope.row.send_ip_port
     }
   }

@@ -18,6 +18,15 @@ export function addMonitorRule(data) {
   })
 }
 
+export function searchMonitorRule(data) {
+  
+  return request({
+    url: '/monitor/rule/get_by_ip',
+    method: 'post',
+    data
+  })
+}
+
 export function updateMonitorRule(data) {
   
   return request({
@@ -44,6 +53,16 @@ export function acitvateFind(data) {
     data
   })
 }
+
+export function acitvateFindDetails(data) {
+  
+  return request({
+    url: '/monitor/active_find_detail',
+    method: 'post',
+    data
+  })
+}
+
 export function getMonitorHL7(data) {
   return request({
     url: '/monitor/result/hl7',

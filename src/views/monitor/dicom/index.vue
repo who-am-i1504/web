@@ -65,7 +65,6 @@
       <d2-crud
         style="margin: -20px;"
         ref="d2Crud"
-        selection-row
         :options="options"
         :columns="columns"
         :data="data"
@@ -76,6 +75,7 @@
         :rowHandle="rowHandle"
         :edit-template="editTemplate"
         @row-edit="handleRowEdit"
+        @custom-emit-2="downloadPicture"
         :loading="loading"/>
        <el-card 
         style="margin: -10px;"
@@ -96,36 +96,35 @@
       </el-card>
     <!-- <el-dialog
       :append-to-body="true"
-      title="Astm详细内容"
+      title="详情"
       :lock-scroll="true"
       :modal="false"
       :visible.sync="dialogVisible"
       width="60%"
       height="60%"
       :before-close="handleClose">
-        <el-container style="height:300px;"> -->
-          <!-- <el-main>
-          <p v-html="content"></p>
-          </el-main> -->
-          <!-- <viewer :images="images" class="viewer" ref="viewer">
-            <template slot-scope="scope">
-              <figure class="images">
-                <div class="image-wrapper" v-for="{source, thumbnail} in scope.images" :key="source">
-                  <img class="image"
-                       :src="thumbnail" :data-source="source" :alt="source.split('?image=').pop()"
-                  >
-                </div>
-              </figure>
-              <p><strong>Options: </strong>{{scope.options}}</p>
-            </template> -->
-            <!-- <img v-for="src in images" :src="src" :key="src"> -->
-          <!-- </viewer>
-        </el-container> -->
-      <!-- <span slot="footer" class="dialog-footer"> -->
-        <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
-        <!-- <el-button type="primary" @click="dialogVisible = false">确 定</el-button> -->
-      <!-- </span> -->
-    <!-- </el-dialog> -->
+        <el-container style="height:300px;">
+          <el-main>
+            <el-form
+              :model="formData"
+            >
+              <div v-for="(value, key, index) in formData" :key="index">
+                <el-form-item
+                  v-if="handleFormTemplateMode(key) === undefine ? false:true"
+                  :label="handleFormTemplateMode(key).title"
+                  :prop="key"
+                >
+
+                </el-form-item>
+              </div>
+            </el-form>
+          </el-main>
+        </el-container>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog> -->
     <img-viewer ref="viewer"/>
   </d2-container>
 </template>
@@ -140,10 +139,14 @@ import sendCell from './component/sendCell'
 import receiverCell from './component/receiverCell'
 import image from './component/image'
 import ImgViewer from "./component/ImgViewer";
+import DialogMyself from "./component/DialogMyself"
+// import {d2CrudPlus} from 'd2-crud-plus'
 Vue.component('SplitPane', SplitPane)
 export default {
+  // mixins:[d2CrudPlus.crud],
   data () {
     return {
+      formData:{},
       content:'',
       dialogVisible:false,
       currentTableData: [],
@@ -167,7 +170,8 @@ export default {
           align:'center',
           showOverflowTooltip:true,
           component:{
-            name:sendCell
+            name:sendCell,
+            disabled:false
           }
         },
         {
@@ -203,54 +207,24 @@ export default {
         }
       ],
       rowHandle: {
-        edit: {
-          icon: 'el-icon-edit',
-          text: '详情',
-          size: 'small',
-          fixed: 'right'
-        }
+        custom: [
+          // {
+          //   icon: 'el-icon-edit',
+          //   text: '详情',
+          //   size: 'small',
+          //   fixed: 'right',
+          //   emit: 'custom-emit-1'
+          // },
+          {
+            icon: 'el-icon-download',
+            text: '图片下载',
+            size: 'small',
+            fixed: 'right',
+            emit: 'custom-emit-2'
+          }
+
+        ]
       },
-      editTemplate: {
-        patient_name: {
-          title: '患者姓名',
-          value: '',
-          component: {
-            // name: '',
-            span: 12
-          }
-        },
-        patient_sex: {
-          title: '性别',
-          value: '',
-          component: {
-            span: 12
-          }
-        },
-        patient_birth_date: {
-          title: '患者出生日期',
-          value: '',
-          component: {
-            span: 18
-          }
-        },
-        patient_birth_time:{
-          title:'患者出生时间',
-          value: '',
-          component: {
-            span: 18
-          }
-        }
-      },
-      downloadColumns:[
-        { label: '序号', prop: 'order' },
-        { label: '类型', prop: 'type' },
-        { label: '发送方IP地址及端口号', prop: 'send_ip_port' },
-        { label: '接收方IP地址及端口号', prop: 'receiver_ip_port' },
-        { label: '发送时间', prop: 'time' },
-        { label: '版本号', prop: 'version' },
-        { label: '数据大小', prop: 'size' },
-        { label: 'ID', prop: 'id' }
-      ],
       mid_data: [],
       loading: false,
       pagination: {
@@ -273,11 +247,22 @@ export default {
       searchRequest:{
         
       },
-      images:[]
+      images:[],
+      list:['patient_name', 'patient_sex', 'patient_birth_date', 'patient_birth_time', 'patient_weight', 'patient_id',
+      'patient_pregnancy_status', 'patient_age', 'study_ris_id', 'study_id', 'study_instance_id', 'study_date', 'study_time',
+      'study_body_part', 'study_description', 'series_num', 'series_instance_id', 'series_modality', 'series_description',
+      'series_date', 'series_time', 'slice_thickness', 'spacing_between_slices', 'slice_location', 'sop_instance_id', 'image_date',
+      'image_time', 'high_bit', 'window_center', 'window_width', 'image_path'],
+      list_name:['患者姓名', '患者性别', '患者出生日期', '患者出生时间', '患者重量', '患者ID',
+      '怀孕装填', '患者年龄', '检查号', '检查ID', '检查实例号', '检查日期', '检查时间',
+      '检查部位', '检查描述', '序列号', '序列实例号', '检查模态', '检查描述和说明',
+      '检查日期', '检查时间', '层厚', '层与层之间的间距', '实际相对位置', 'sop实例号', '图片日期',
+      '图片时间', '高位', '窗位', '窗宽', '图片位置']
     }
   },
   components: {
-    ImgViewer
+    ImgViewer,
+    DialogMyself
   },
   watch: {
     pagination: function(value){
@@ -293,6 +278,13 @@ export default {
         this.mid_data[x]['order'] = (this.pagination['page'] - 1) * this.pagination['pageSize'] + i
         for (var j in this.mid_data[x]['content']){
           if (this.mid_data[x][j] == undefined){
+            if (typeof this.mid_data[x]['content'][j] === 'undefined' || this.mid_data[x]['content'][j] === null){
+              this.mid_data[x]['content'][j] = '无'
+            }else if (typeof this.mid_data[x][j] === 'string' ){
+
+            }else{
+              this.mid_data[x]['content'][j] = String(this.mid_data[x]['content'][j])
+            }
             this.mid_data[x][j] = this.mid_data[x]['content'][j]
           }
         }
@@ -311,12 +303,55 @@ export default {
     },
     whichShow:function(){
       return !this.searching
+    },
+    editTemplate:function(){
+      var list = this.list
+      var list_name = this.list_name
+      var result = {} 
+      for (var x = 0; x < list.length; x ++){
+        result[list[x]] = {
+          title:list_name[x],
+          value: '',
+          span:18,
+          component: {
+            render: function (createElement, scope) {
+              return createElement(
+                'el-button',   // 标签名称
+                {
+                  attrs: {
+                    type: "text"
+                  }
+                },
+                scope
+              )
+            }
+          }
+        }
+      }
+      return result
+    },
+    downloadColumns:function (){
+      var result = []
+      var list = this.list
+      var list_name = this.list_name
+      for (var x=0; x < list.length; x ++){
+        result.push({label:list_name[x], prop:list[x]})
+      }
+      result.push({label:'序号', prop:'order'})
+      return result
     }
   },
   mounted() {
     this.fetchData()
   },
   methods: {
+    downloadPicture({index, row}){
+      window.open('http://10.246.174.203:5000/picture/download/' + row.image_path)
+    },
+    // showCurdDialog({index, row}){
+    //   this.$refs.dialogMyself.handleFormData(row)
+    //   this.dialogVisible = true
+    // },
     handleClose(done){
       done()
     },

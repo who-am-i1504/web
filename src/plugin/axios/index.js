@@ -35,7 +35,7 @@ function errorLog (error) {
 
 // 创建一个 axios 实例
 const service = axios.create({
-  baseURL: 'http://localhost:8080',//process.env.VUE_APP_API,
+  baseURL: 'http://10.246.165.19:8080',//process.env.VUE_APP_API,
   timeout: 5000 // 请求超时时间
 })
 

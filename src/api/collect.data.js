@@ -8,6 +8,30 @@ export function collect(data) {
     })
 }
 
+export function getResult(data){
+    return request({
+        url:'/collect/result/get_by_page',
+        method:'post',
+        data
+    })
+}
+
+export function startTask(data){
+    return request({
+        url:'/collect/start',
+        method:'post',
+        data
+    })
+}
+
+export function getState(params){
+    return request({
+        url:'/collect/state',
+        method:'get',
+        params
+    })
+}
+
 export function IPposition(data) {
     return request({
         url: '/collect/result/ip_position',

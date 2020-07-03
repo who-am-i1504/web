@@ -15,6 +15,8 @@ import i18n from '@/i18n.js'
 import pluginError from '@/plugin/error'
 import pluginLog from '@/plugin/log'
 import pluginOpen from '@/plugin/open'
+import { d2CrudPlus } from 'd2-crud-plus'
+import request from '../axios'
 
 export default {
   async install (Vue, options) {
@@ -38,5 +40,15 @@ export default {
     Vue.use(pluginLog)
     Vue.use(pluginOpen)
     Vue.use(D2Crud)
+    Vue.use(d2CrudPlus, {
+      getRemoteDictFunc(url){
+        return request({
+          url:url,
+          method:'get'
+        }).then(ret => {
+          return ret.data
+        })
+      }
+    })
   }
 }

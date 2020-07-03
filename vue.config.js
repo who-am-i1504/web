@@ -30,7 +30,7 @@ module.exports = {
   lintOnSave: true,
   devServer: {
     publicPath, // 和 publicPath 保持一致
-    proxy:'http://10.246.158.199:5000'
+    proxy:'http://10.246.174.203:5000'
     // proxy:{
     //   '/api':{
     //     target:'http://10.246.158.199:5000',
@@ -66,7 +66,7 @@ module.exports = {
       // 关闭 host check，方便使用 ngrok 之类的内网转发工具
       configNew.devServer = {
         disableHostCheck: true,
-        proxy:'http://10.246.158.199:5000'
+        proxy:'http://10.246.174.203:5000'
         // proxy:{
         //   '/api':{
         //     target:'http://10.246.158.199:5000',
