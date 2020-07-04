@@ -28,6 +28,7 @@
     <el-switch v-model="table" active-text="表格" inactive-text="Json 树" />
     <div class="loading-area"/>
     <div v-show="data.length > 0" class="loading-area1">
+      <el-divider content-position="center">masscan端口发现结果</el-divider>
       <div v-show="!table">
         <tree-view
           :data="showMessage"
@@ -40,6 +41,7 @@
       </div>
     </div>
     <div v-show="dataDetail.length > 0" class="loading-area2">
+      <el-divider content-position="center">nmap端口发现结果</el-divider>
       <div v-show="!table">
         <tree-view
           :data="showDetailMessage"
