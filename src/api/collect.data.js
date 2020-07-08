@@ -42,7 +42,7 @@ export function IPposition(data) {
 
 export function HL7Collect(data) {
     return request({
-        url: '/collect/hl7/message',
+        url: '/monitor/hl7_by_page',
         method: 'post',
         data
     })
@@ -66,7 +66,7 @@ export function HL7Search(data){
 
 export function AstmCollect(data) {
   return request({
-    url: '/collect/astm/message',
+    url: '/monitor/astm_by_page',
     method: 'post',
     data
   })

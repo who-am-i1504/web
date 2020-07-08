@@ -66,6 +66,7 @@
         style="margin: -20px;"
         ref="d2Crud"
         selection-row
+        expand-row
         :options="options"
         :columns="columns"
         :data="data"
@@ -74,7 +75,33 @@
         @dialog-cancel="handleDialogCancel"
         @row-dblclick="doubleClick"
         @row-edit="handleRowEdit"
-        :loading="loading"/>
+        :loading="loading">
+        <template slot="expandSlot" slot-scope="scope">
+        <el-input type="textarea" placeholder="内容" :rows="5" v-model="scope.row.content"></el-input>
+        <!-- <div> -->
+        <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
+        <el-form slot="paneL" ref="form" :model="scope.row" :fullscreen="true">
+          <el-row>
+            <!-- <el-col :span="4"> -->
+            <template v-for="(key, index) in list">
+              <el-col :span="12">
+                <el-form-item :label="list_name[index]">
+                  <el-button type="text">{{scope.row[key]}}</el-button>
+                </el-form-item>
+              </el-col>
+            </template>
+            <!-- </el-col> -->
+            <el-col :span="4">
+              <image slot="paneR" :value="scope.row['image_path']" />
+            </el-col>
+          </el-row>
+          <!-- <slot name="FormBodyAppendSlot" :form="scope.row" /> -->
+        </el-form>
+
+        <!-- </SplitPane> -->
+        <!-- </div> -->
+      </template>
+      </d2-crud>
        <el-card 
         style="margin: -10px;"
         slot="footer">
@@ -92,25 +119,6 @@
             @next-click="handlePaginationNextClick">
           </el-pagination>
       </el-card>
-    <el-dialog
-      :append-to-body="true"
-      title="Astm详细内容"
-      :lock-scroll="true"
-      :modal="false"
-      :visible.sync="dialogVisible"
-      width="60%"
-      height="60%"
-      :before-close="handleClose">
-        <el-container style="height:300px;">
-          <el-main>
-          <p v-html="content"></p>
-          </el-main>
-        </el-container>
-      <span slot="footer" class="dialog-footer">
-        <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
   </d2-container>
 </template>
 
@@ -224,8 +232,21 @@ export default {
       },
       searching:false,
       searchRequest:{
-        
       },
+      list:[
+        'seqnumber',
+        'type',
+        'size',
+        'version',
+        'time'
+      ],
+      list_name:[
+        '序列号',
+        '消息类型',
+        '数据大小',
+        '协议版本',
+        '发送时间'
+      ]
     }
   },
   watch: {

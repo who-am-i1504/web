@@ -72,6 +72,7 @@
       :loading="loading"
     >
       <template slot="expandSlot" slot-scope="scope">
+        <el-input type="textarea" placeholder="内容" :rows="5" v-model="scope.row.content"></el-input>
         <!-- <div> -->
         <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
         <el-form slot="paneL" ref="form" :model="scope.row" :fullscreen="true">
@@ -111,26 +112,6 @@
         @next-click="handlePaginationNextClick"
       ></el-pagination>
     </el-card>
-    <el-dialog
-      :append-to-body="true"
-      title="Astm详细内容"
-      :lock-scroll="true"
-      :modal="false"
-      :visible.sync="dialogVisible"
-      width="60%"
-      height="60%"
-      :before-close="handleClose"
-    >
-      <el-container style="height:300px;">
-        <el-main>
-          <p v-html="content"></p>
-        </el-main>
-      </el-container>
-      <span slot="footer" class="dialog-footer">
-        <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
   </d2-container>
 </template>
 
@@ -142,6 +123,7 @@ import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
+import { getAstmDataById } from "@/api/medical.data";
 Vue.component("SplitPane", SplitPane);
 export default {
   data() {
@@ -251,7 +233,39 @@ export default {
         stripe: true
       },
       searching: false,
-      searchRequest: {}
+      searchRequest: {},
+      list: [
+        "sender",
+        "sender_address",
+        "sender_phone",
+        "sender_character",
+        "receiver_id",
+        "receiver_type_id",
+        "processing_id",
+        "type",
+        "message_id",
+        "password",
+        "seqnumber",
+        "size",
+        "version",
+        "message_time"
+      ],
+      list_name: [
+        "发送方名称",
+        "发送方地址",
+        "发送方电话号码",
+        "发送方通信特征",
+        "接收方ID",
+        "接收方处理ID",
+        "流程ID",
+        "消息类型",
+        "消息ID",
+        "密码",
+        "消息序列号",
+        "消息大小（单位：字节）",
+        "消息版本",
+        "消息发送时间"
+      ]
     };
   },
   watch: {
@@ -278,9 +292,6 @@ export default {
     this.fetchData();
   },
   methods: {
-    getDataById(id){
-
-    },
     handleClose(done) {
       done();
     },

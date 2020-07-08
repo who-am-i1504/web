@@ -65,14 +65,15 @@
       :data="data"
       @selection-change="handleSelectionChange"
       :form-options="formOptions"
-      @dialog-cancel="handleDialogCancel"
-      @row-dblclick="doubleClick"
       :rowHandle="rowHandle"
-      :edit-template="editTemplate"
-      @row-edit="handleRowEdit"
       @custom-emit-2="downloadPicture"
       :loading="loading"
     >
+      <template slot="image_pathSlot" slot-scope="scope">
+        <!-- <div> -->
+          <image-tag :value="scope.row.image_path" @click="doubleClick(scope.row)" />
+        <!-- </div> -->
+      </template>
       <template slot="expandSlot" slot-scope="scope">
         <!-- <div> -->
         <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
@@ -156,7 +157,7 @@ import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
-import image from "./component/image";
+import ImageTag from "./component/image";
 import ImgViewer from "./component/ImgViewer";
 // import {d2CrudPlus} from 'd2-crud-plus'
 Vue.component("SplitPane", SplitPane);
@@ -180,13 +181,15 @@ export default {
           key: "order",
           align: "center",
           width: 90,
-          showOverflowTooltip: true
+          showOverflowTooltip: true,
+          sortable:true
         },
         {
           title: "发送方IP地址及端口号",
           key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
+          sortable:true,
           component: {
             name: sendCell,
             disabled: false
@@ -196,6 +199,7 @@ export default {
           title: "接收方IP地址及端口号",
           key: "receiver_tag",
           align: "center",
+          sortable:true,
           showOverflowTooltip: true,
           component: {
             name: receiverCell
@@ -205,12 +209,14 @@ export default {
           title: "发送时间",
           key: "time",
           align: "center",
+          sortable:true,
           showOverflowTooltip: true
         },
         {
           title: "数据大小",
           key: "size",
-          width: 90,
+          // width: 100,
+          sortable:true,
           align: "center",
           showOverflowTooltip: true
         },
@@ -218,10 +224,12 @@ export default {
           title: "图片预览",
           key: "image_path",
           align: "center",
+          type: "datetime",
           width: 90,
-          component: {
-            name: image
-          }
+          rowSlot: true
+          // component: {
+          //   name: image
+          // }
         }
       ],
       rowHandle: {
@@ -333,7 +341,7 @@ export default {
   },
   components: {
     ImgViewer,
-    DialogMyself
+    ImageTag
   },
   watch: {
     pagination: function(value) {
@@ -379,32 +387,6 @@ export default {
     },
     whichShow: function() {
       return !this.searching;
-    },
-    editTemplate: function() {
-      var list = this.list;
-      var list_name = this.list_name;
-      var result = {};
-      for (var x = 0; x < list.length; x++) {
-        result[list[x]] = {
-          title: list_name[x],
-          value: "",
-          span: 18,
-          component: {
-            render: function(createElement, scope) {
-              return createElement(
-                "el-button", // 标签名称
-                {
-                  attrs: {
-                    type: "text"
-                  }
-                },
-                scope
-              );
-            }
-          }
-        };
-      }
-      return result;
     },
     downloadColumns: function() {
       var result = [];
@@ -476,7 +458,7 @@ export default {
       this.pagination.page = val;
       this.fetchData();
     },
-    doubleClick(row, event) {
+    doubleClick(row) {
       // this.$refs.d2Crud.showDialog({
       //   mode:'edit',
       //   rowIndex : row.order - (this.pagination.page - 1)*this.pagination.pageSize  - 1
@@ -489,13 +471,13 @@ export default {
         // Math.floor(Math.random() * 10)
       );
     },
-    handleDialogCancel(done) {
-      done();
-    },
-    handleRowEdit({ index, row }, done) {
-      this.formOptions.saveLoading = true;
-      setTimeout(() => {}, 300);
-    },
+    // handleDialogCancel(done) {
+    //   done();
+    // },
+    // handleRowEdit({ index, row }, done) {
+    //   this.formOptions.saveLoading = true;
+    //   setTimeout(() => {}, 300);
+    // },
     searchItemInForm() {
       this.searching = false;
       var newRow = {};
@@ -565,7 +547,7 @@ export default {
     handleDownloadXlsx(data) {
       this.$export
         .excel({
-          title: "Astm部分数据",
+          title: "DICOM部分数据",
           columns: this.downloadColumns,
           data: this.downloadDataTranslate(data)
         })
@@ -576,7 +558,7 @@ export default {
     handleDownloadCsv(data) {
       this.$export
         .csv({
-          title: "Astm部分数据",
+          title: "DICOM部分数据",
           columns: this.downloadColumns,
           data: this.downloadDataTranslate(data)
         })
