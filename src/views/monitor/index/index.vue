@@ -11,19 +11,20 @@
     </template> -->
     <template slot="header">
     <div class="d2-page-cover">
-      <p class="d2-page-cover__title">传输规则数量饼形图</p>      
+      <p class="d2-page-cover__title">疑似医疗数据传输泄露情况</p>      
     </div>
     </template>
     <div class="inner">
-      <ve-pie :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-pie>
+      <ve-ring :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-ring>
     </div>
+    <div ref="chart" style="width:100%;height:376px"></div>
   </d2-container>
 </template>
 
 <script>
 import menu from '@/menu/modules/demo-playground'
 import list from '@/views/_mixin/list.js'
-import {getRule} from '@api/demo.business.table.1'
+import {monitorCount} from '@/api/monitor'
 
 export default {
   mixins: [
@@ -41,9 +42,10 @@ export default {
         subTitle: '在这里可以进行HL7规则的添加,删除,更改等功能'
       },
       chartSettings:{
-        radius: 150,
-        offsetY:250,
-        label:'传输规则数目示意图'
+        // radius: 150,
+        // offsetY:250,
+        // label:'传输规则数目示意图'
+        // roseType: 'radius'
       },
       chartData: {
         columns:['协议类型', '数量'],
@@ -69,9 +71,7 @@ export default {
   },
   methods: {
     fetchData () {
-      getRule({
-        ...this.pagination
-      }).then(res => {
+      monitorCount().then(res => {
         
         this.chartData.rows = res.data
         if (res.status != 200){

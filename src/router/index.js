@@ -46,8 +46,24 @@ router.beforeEach(async (to, from, next) => {
     // 这里暂时将cookie里是否存有token作为验证是否登录的条件
     // 请根据自身业务需要修改
     const token = util.cookies.get('token')
+    const info = store.state.d2admin.user.info
     if (token && token !== 'undefined') {
-      next()
+      // console.log(store)
+      // console.log(info)
+      if (to.matched.some(r => r.meta.reader)){
+        if((info.authority & info.roles['Reader']) > 0){
+          next()
+        }else{
+          next({
+            name:'authority_control',
+            query: {
+              redirect: to.fullPath
+            }
+          })
+        }
+      }else{
+        next()
+      }
     } else {
       // 没有登录的时候跳转到登录界面
       // 携带上登陆成功之后需要跳转的页面完整路径

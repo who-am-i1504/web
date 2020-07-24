@@ -32,6 +32,19 @@ export default [
   collect,
   monitor,
   // {
+  //   path:'/error',
+  //   title:'提示',
+  //   icon:'puzzle-piece',
+  //   children:[
+  //     {
+
+  //       path:'/error/no_authority',
+  //       title:'权限不足',
+
+  //     }
+  //   ]
+  // },
+  // {
   //   title: '功能',
   //   icon: 'puzzle-piece',
   //   children: [

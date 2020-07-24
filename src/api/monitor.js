@@ -1,5 +1,11 @@
 import request from '@/plugin/axios'
 
+export function monitorCount() {
+  return request({
+      url: '/monitor/count',
+      method: 'get'
+  })
+}
 
 export function getMonitorRule(data) {
   return request({

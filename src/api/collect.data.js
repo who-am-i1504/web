@@ -58,7 +58,7 @@ export function HL7Detail(data) {
 
 export function HL7Search(data){
     return request({
-        url: '/collect/hl7/search',
+        url: '/monitor/hl7_search',
         method: 'post',
         data
     })
@@ -74,7 +74,7 @@ export function AstmCollect(data) {
 
 export function AstmSearch(data) {
   return request({
-    url: '/collect/astm/search',
+    url: '/monitor/astm_search',
     method: 'post',
     data
   })

@@ -1,6 +1,6 @@
 <template>
   <el-dropdown size="small" class="d2-mr">
-    <span class="btn-text">{{info.name ? `${info.name}` : '未登录'}}</span>
+    <span class="btn-text">{{info.username ? `${info.username}` : '未登录'}}</span>
     <el-dropdown-menu slot="dropdown">
       <el-dropdown-item @click.native="logOff">
         <d2-icon name="power-off" class="d2-mr-5"/>
@@ -10,7 +10,7 @@
         <d2-icon name="plus" class="d2-mr-5"/>
         更改密码
       </el-dropdown-item>
-      <el-dropdown-item v-if="info.authority && info.authority === 1" @click.native="ManagerUser">
+      <el-dropdown-item v-if="info.authority && (info.authority & (info.roles['SuperAdmin'] | info.roles['Admin'] | info.roles['ReaderAdmin'] | info.roles['EditorAdmin'] )) > 0" @click.native="ManagerUser">
         <d2-icon name="plus" class="d2-mr-5"/>
         用户管理
       </el-dropdown-item>
@@ -36,6 +36,9 @@ export default {
         { title: '追加页面 3', name: 'add-routes-3', path: 'add-routes/3', component: '3' }
       ]
     }
+  },
+  mounted() {
+    
   },
   computed: {
     ...mapState('d2admin/user', [

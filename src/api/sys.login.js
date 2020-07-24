@@ -7,3 +7,30 @@ export function AccountLogin (data) {
     data
   })
 }
+
+export function getSalt(){
+  return request({
+    url:'/salt',
+    method:'get'
+  })
+}
+
+export function AccountLogOut(data){
+
+  return request({
+    url:'/logout',
+    method:'post',
+    data
+  })
+
+}
+
+export function ChangePwd(data){
+
+  return request({
+    url:'/changePwd',
+    method:'post',
+    data
+  })
+
+}

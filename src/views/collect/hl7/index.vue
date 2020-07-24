@@ -1,55 +1,51 @@
 <template>
   <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
-    <!-- <template slot="header">
-        <div style="margin: -16px;">
-          <SplitPane :min-percent='10' :default-percent='20' split="vertical">
-            <template slot="paneL">
-              <SplitPane :min-percent='10' :default-percent='80' split="vertical">
-                <el-input v-model="inputStr1" slot="paneL" placeholder="类型" size="small"></el-input>
-                <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox1" >{{radioString}}</el-checkbox>
-              </SplitPane>
-            </template>
-            <template slot="paneR">
-              <SplitPane :min-percent='10' :default-percent='25' split="vertical">
-                <template slot="paneL">
-                  <SplitPane :min-percent='10' :default-percent='80' split="vertical">
-                  <el-input v-model="inputStr2" slot="paneL" size="small" placeholder="IP地址:端口"></el-input>
-                  <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox2">{{radioString}}</el-checkbox>
-                  </SplitPane>
-                </template>
-                <template slot="paneR">
-                  <SplitPane :min-percent='10' :default-percent='33' split="vertical">
-                    <template slot="paneL">
-                      <SplitPane :min-percent='10' :default-percent='80' split="vertical">
-                        <el-input v-model="inputStr3" slot="paneL" size="small" placeholder="序列号"></el-input>
-                        <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox3" >{{radioString}}</el-checkbox>
-                      </SplitPane>
-                    </template>
-                    <template slot="paneR">
-                      <SplitPane :min-percent='10' :default-percent='50' split="vertical">
-                        <template slot="paneL">
-                          <SplitPane :min-percent='10' :default-percent='80' split="vertical">
-                            <el-input v-model="inputStr4" slot="paneL" size="small" placeholder="版本号"></el-input>
-                            <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox4">{{radioString}}</el-checkbox>
-                          </SplitPane>
-                        </template>
-                        <template slot="paneR">
-                          <el-button
-                            size="small"
-                            @click="searchItemInForm">
-                            <d2-icon name="search"/>
-                            搜索
-                          </el-button>
-                        </template>
-                      </SplitPane>
-                    </template>
-                  </SplitPane>
-                </template>
-              </SplitPane>
-            </template>
-          </SplitPane>
-        </div>
-    </template>-->
+    <template slot="header">
+      <div class="panel-search">
+        <el-form :inline="true" ref="form" size="mini" class="panel-search__input">
+          <el-form-item>
+            <SplitPane
+              style="width: 150px;"
+              :min-percent="10"
+              :default-percent="80"
+              split="vertical"
+            >
+              <el-input v-model="inputStr1" slot="paneL" placeholder="类型" size="small"></el-input>
+              <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox1">{{radioString}}</el-checkbox>
+            </SplitPane>
+          </el-form-item>
+          <el-form-item>
+            <SplitPane
+              style="width: 150px;"
+              :min-percent="10"
+              :default-percent="80"
+              split="vertical"
+            >
+              <el-input v-model="inputStr3" slot="paneL" size="small" placeholder="序列号"></el-input>
+              <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox3">{{radioString}}</el-checkbox>
+            </SplitPane>
+          </el-form-item>
+
+          <el-form-item>
+            <SplitPane
+              style="width: 150px;"
+              :min-percent="10"
+              :default-percent="80"
+              split="vertical"
+            >
+              <el-input v-model="inputStr4" slot="paneL" size="small" placeholder="版本号"></el-input>
+              <el-checkbox style="margin: 10px;" slot="paneR" v-model="checkbox4">{{radioString}}</el-checkbox>
+            </SplitPane>
+          </el-form-item>
+
+          <el-form-item style="width: 150px;">
+            <el-button size="small" @click="searchItemInForm">
+              <d2-icon name="search" />搜索
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </template>
     <el-form :inline="true" size="mini">
       <el-form-item :label="`全部数据下载 [ ${pagination.total} ] 条`">
         <el-button-group>
@@ -159,6 +155,8 @@ import { HL7Collect, HL7Detail, HL7Search } from "@api/collect.data";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
+import sendCell from "./component/sendCell";
+import receiverCell from "./component/receiverCell";
 Vue.component("SplitPane", SplitPane);
 export default {
   data() {
@@ -186,56 +184,62 @@ export default {
           align: "center",
           width: 90,
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         },
         {
           title: "类型",
           key: "type",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         },
         {
           title: "发送方IP地址及端口号",
-          key: "send_ip_port",
+          key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true,
+          component: {
+            name: sendCell
+          }
         },
         {
           title: "接收方IP地址及端口号",
-          key: "receiver_ip_port",
+          key: "receiver_tag",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true,
+          component: {
+            name: receiverCell
+          }
         },
         {
           title: "序列号",
           key: "seqnumber",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         },
         {
           title: "发送时间",
           key: "time",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         },
         {
           title: "版本号",
           key: "version",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         },
         {
           title: "数据大小",
           key: "size",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true
         }
       ],
       downloadColumns: [
@@ -270,12 +274,8 @@ export default {
       },
       searching: false,
       searchRequest: {},
-      list:[
-        
-      ],
-      list_name:[
-        
-      ]
+      list: [],
+      list_name: []
     };
   },
   watch: {
@@ -383,27 +383,56 @@ export default {
       this.pagination.page = page;
       this.fetchData();
     },
-    fetchData () {
-      this.loading = true
-      var para = {}
-      para['page'] = this.pagination.page
-      para['pageSize'] = this.pagination.pageSize
-      if (this.whichShow){
-      }else{
-        for (var x in this.searchRequest){
-          para[x] = this.searchRequest[x]
+    fetchData() {
+      this.loading = true;
+      var para = {};
+      para["page"] = this.pagination.page;
+      para["pageSize"] = this.pagination.pageSize;
+      if (this.whichShow) {
+      } else {
+        for (var x in this.searchRequest) {
+          para[x] = this.searchRequest[x];
         }
       }
-      HL7Collect({
-        ...para
-      }).then(res => {
-        this.mid_data = res.data
-        this.pagination.total = res.size
-        this.loading = false
-      }).catch(err => {
-        this.loading = false
-      })
-    }, 
+      if (!this.searching) {
+        HL7Collect({
+          ...para
+        })
+          .then(res => {
+            this.mid_data = res.data;
+            this.pagination.total = res.size;
+            this.loading = false;
+          })
+          .catch(err => {
+            this.loading = false;
+          });
+      } else {
+        this.searchRequest["pageSize"] = this.pagination.pageSize;
+        this.searchRequest["page"] = this.pagination.page;
+        HL7Search({
+          ...this.searchRequest
+        })
+          .then(res => {
+            this.loading = false;
+            if (res.status === 200) {
+              this.mid_data = res.data;
+              this.pagination.total = res.size;
+            } else {
+              this.$message({
+                message: res.message,
+                type: "warning"
+              });
+            }
+          })
+          .catch(err => {
+            this.loading = false;
+            this.$message({
+              message: "网络错误",
+              type: "error"
+            });
+          });
+      }
+    },
     // fetchData() {
     //   this.loading = true;
     //   if (this.whichShow) {
@@ -421,29 +450,29 @@ export default {
     //   } else {
     //     this.searchRequest["pageSize"] = this.pagination.pageSize;
     //     this.searchRequest["page"] = this.pagination.page;
-    //     HL7Search({
-    //       ...this.searchRequest
-    //     })
-    //       .then(res => {
-    //         this.loading = false;
-    //         if (res.status === 200) {
-    //           this.mid_data = res.data;
-    //           this.pagination.total = res.size;
-    //         } else {
-    //           this.$message({
-    //             message: res.message,
-    //             type: "warning"
-    //           });
-    //         }
-    //       })
-    //       .catch(err => {
-    //         this.loading = false;
+    //   HL7Search({
+    //     ...this.searchRequest
+    //   })
+    //     .then(res => {
+    //       this.loading = false;
+    //       if (res.status === 200) {
+    //         this.mid_data = res.data;
+    //         this.pagination.total = res.size;
+    //       } else {
     //         this.$message({
-    //           message: "网络错误",
-    //           type: "error"
+    //           message: res.message,
+    //           type: "warning"
     //         });
+    //       }
+    //     })
+    //     .catch(err => {
+    //       this.loading = false;
+    //       this.$message({
+    //         message: "网络错误",
+    //         type: "error"
     //       });
-    //   }
+    //     });
+    // }
     // },
     handleSizeChange(val) {
       this.pagination.pageSize = val;
@@ -479,6 +508,7 @@ export default {
     },
     searchItemInForm() {
       this.searching = false;
+      this.searchRequest = {};
       var newRow = {};
       if (this.checkbox1 && this.inputStr1 === "") {
         this.$message({
@@ -489,54 +519,54 @@ export default {
       } else if (this.checkbox1) {
         newRow["type"] = this.inputStr1;
       }
-      if (this.checkbox2 && this.inputStr2 === "") {
-        this.$message({
-          message: "您的IP地址输入框输入为空",
-          type: "warning"
-        });
-        return;
-      } else if (this.checkbox2) {
-        // 此处正则表达式主要匹配以下几种情况 如果格式不正确则返回相关的提示信息
-        // 1 ip 127.0.0.1
-        // 2 ip:  127.0.0.1:
-        // 3 ip:port 127.0.0.1:8080
-        // 4 :port  :8080
-        let re = new RegExp(
-          "(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$)|(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}:[0-9]{0,5}$)|(^:[0-9]{1,5}$)"
-        );
-        if (!re.test(this.inputStr2)) {
-          this.$notify({
-            title: "IP地址和端口号输入不正确",
-            message:
-              "<strong>主要有以下几种形式:</strong><br><i>ip    127.0.0.1</i><br><i>ip:     127.0.0.1:</i><br><i>ip:port     127.0.0.1:8080</i><br><i>:port     :8080</i>",
-            type: "warining",
-            dangerouslyUseHTMLString: true
-          });
-          return;
-        }
-        if (this.inputStr2.indexOf(":") == -1) {
-          newRow["ip"] = this.inputStr2;
-        } else {
-          if (this.inputStr2.indexOf(":") === this.inputStr2.length - 1) {
-            newRow["ip"] = this.inputStr2.substring(
-              0,
-              this.inputStr2.length - 1
-            );
-          } else if (this.inputStr2.indexOf(":") == 0) {
-            value = Number(this.inputStr2.substring(1).trim());
-            if (!isNaN(value)) {
-              newRow["port"] = value;
-            }
-            this.$message({
-              message: "端口号取整出现问题",
-              type: "warning"
-            });
-            return;
-          } else {
-            newRow["ip_port"] = this.inputStr2;
-          }
-        }
-      }
+      // if (this.checkbox2 && this.inputStr2 === "") {
+      //   this.$message({
+      //     message: "您的IP地址输入框输入为空",
+      //     type: "warning"
+      //   });
+      //   return;
+      // } else if (this.checkbox2) {
+      //   // 此处正则表达式主要匹配以下几种情况 如果格式不正确则返回相关的提示信息
+      //   // 1 ip 127.0.0.1
+      //   // 2 ip:  127.0.0.1:
+      //   // 3 ip:port 127.0.0.1:8080
+      //   // 4 :port  :8080
+      //   let re = new RegExp(
+      //     "(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$)|(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}:[0-9]{0,5}$)|(^:[0-9]{1,5}$)"
+      //   );
+      //   if (!re.test(this.inputStr2)) {
+      //     this.$notify({
+      //       title: "IP地址和端口号输入不正确",
+      //       message:
+      //         "<strong>主要有以下几种形式:</strong><br><i>ip    127.0.0.1</i><br><i>ip:     127.0.0.1:</i><br><i>ip:port     127.0.0.1:8080</i><br><i>:port     :8080</i>",
+      //       type: "warining",
+      //       dangerouslyUseHTMLString: true
+      //     });
+      //     return;
+      //   }
+      //   if (this.inputStr2.indexOf(":") == -1) {
+      //     newRow["ip"] = this.inputStr2;
+      //   } else {
+      //     if (this.inputStr2.indexOf(":") === this.inputStr2.length - 1) {
+      //       newRow["ip"] = this.inputStr2.substring(
+      //         0,
+      //         this.inputStr2.length - 1
+      //       );
+      //     } else if (this.inputStr2.indexOf(":") == 0) {
+      //       value = Number(this.inputStr2.substring(1).trim());
+      //       if (!isNaN(value)) {
+      //         newRow["port"] = value;
+      //       }
+      //       this.$message({
+      //         message: "端口号取整出现问题",
+      //         type: "warning"
+      //       });
+      //       return;
+      //     } else {
+      //       newRow["ip_port"] = this.inputStr2;
+      //     }
+      //   }
+      // }
       if (this.checkbox3 && this.inputStr3 === "") {
         this.$message({
           message: "您的序列号输入框输入为空",
@@ -555,8 +585,10 @@ export default {
       } else if (this.checkbox4) {
         newRow["version"] = this.inputStr4;
       }
+      if (Object.getOwnPropertyNames(newRow).length > 0) {
+        this.searching = true;
+      }
       this.searchRequest = newRow;
-      this.searching = true;
       this.fetchData();
     },
     handleSelectionChange(val) {
@@ -749,3 +781,15 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+.panel-search {
+  @extend %unable-select;
+
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  .panel-search__input {
+    text-align: center;
+  }
+}
+</style>
