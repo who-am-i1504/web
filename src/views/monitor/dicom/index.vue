@@ -69,6 +69,20 @@
       @custom-emit-2="downloadPicture"
       :loading="loading"
     >
+      <template slot="sender_tagSlot" slot-scope="scope">
+        <send-cell
+          :value="scope.row.sender_tag"
+          :scope="scope"
+          @click="showGraph(scope.row.send_ip_port, scope.row.sender_tag)"
+        ></send-cell>
+      </template>
+      <template slot="receiver_tagSlot" slot-scope="scope">
+        <receiver-cell
+          :value="scope.row.receiver_tag"
+          :scope="scope"
+          @click="showGraph(scope.row.receiver_ip_port, scope.row.receiver_tag)"
+        ></receiver-cell>
+      </template>
       <template slot="image_pathSlot" slot-scope="scope">
         <!-- <div> -->
           <image-tag :value="scope.row.image_path" @click="doubleClick(scope.row)" />
@@ -113,6 +127,18 @@
         @prev-click="handlePaginationPrevClick"
         @next-click="handlePaginationNextClick"
       ></el-pagination>
+      <el-dialog
+        title="关系网络图"
+        :visible.sync="dialogVisible"
+        width="50%"
+        :before-close="handleClose"
+      >
+        <div ref="chart" style="width:100%;height:400px"></div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
     <!-- <el-dialog
       :append-to-body="true"
@@ -151,7 +177,7 @@
 
 <script>
 // import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
-import { getMonitorDICOM } from "@api/monitor";
+import { getMonitorDICOM, DICOMGraph } from "@api/monitor";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
@@ -190,20 +216,22 @@ export default {
           align: "center",
           showOverflowTooltip: true,
           sortable:true,
-          component: {
-            name: sendCell,
-            disabled: false
-          }
+          // component: {
+          //   name: sendCell,
+          //   disabled: false
+          // }
+          rowSlot: true,
         },
         {
           title: "接收方IP地址及端口号",
           key: "receiver_tag",
           align: "center",
           sortable:true,
-          showOverflowTooltip: true,
-          component: {
-            name: receiverCell
-          }
+          // showOverflowTooltip: true,
+          // component: {
+          //   name: receiverCell
+          // }
+          rowSlot: true,
         },
         {
           title: "发送时间",
@@ -336,12 +364,40 @@ export default {
         "窗位",
         "窗宽",
         "图片路径"
-      ]
+      ],
+      webkitDep: {
+        type: "force",
+        nodes: [],
+        links: [],
+        categories: [
+          {
+            name: "正常IP",
+            keyword: {},
+            base: "HTMLElement",
+          },
+          {
+            name: "可疑IP",
+            keyword: {},
+            base: "WebGLRenderingContext",
+          },
+        ],
+      },
+      nodes: {},
+      midCount: 0,
+      count: 0,
+      nodeSize: {
+        1: 50,
+        2: 35,
+        3: 10,
+      },
+      myChart: "",
     };
   },
   components: {
     ImgViewer,
-    ImageTag
+    ImageTag,
+    sendCell,
+    receiverCell
   },
   watch: {
     pagination: function(value) {
@@ -397,12 +453,171 @@ export default {
       }
       result.push({ label: "序号", prop: "order" });
       return result;
-    }
+    },
+    options_graph: function () {
+      const webkitDep = this.webkitDep;
+      return {
+        title: {
+            text: 'DICOM局部网络结构',
+            subtext: 'Default layout',
+            top: 'bottom',
+            left: 'right'
+        },
+        legend: {
+          data: webkitDep.categories,
+        },
+        series: [
+          {
+            type: "graph",
+            layout: "force",
+            animation: false,
+            label: {
+              position: "right",
+              formatter: "{b}",
+            },
+            draggable: true,
+            data: webkitDep.nodes.map(function (node, idx) {
+              return {
+                symbolSize: node.size,
+                id: idx,
+                name: node.name,
+                value: node.value,
+                category: node.category,
+              };
+            }),
+            categories: webkitDep.categories,
+            force: {
+              edgeLength: 100,
+              repulsion: 200,
+              gravity: 0.2,
+            },
+            edges: webkitDep.links,
+          },
+        ],
+      };
+    },
   },
   mounted() {
     this.fetchData();
   },
   methods: {
+    showGraph(ip_port, tag) {
+      this.midCount = 0;
+      this.count = 0;
+      this.dialogVisible = true;
+      const ip = ip_port.substring(0, ip_port.lastIndexOf(":"));
+      this.webkitDep.nodes = [];
+      this.webkitDep.links = [];
+      this.nodes = {};
+      var x = this.webkitDep.nodes.push({
+        name: ip,
+        value: 1,
+        category: tag ? 1 : 0,
+        size: this.nodeSize[1],
+      });
+      this.nodes[ip] = x - 1;
+      this.getDICOMIP(ip, 2);
+    },
+    getDICOMIP(ip, depth) {
+      if (depth > 3) return;
+      DICOMGraph({
+        ip: ip,
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            for (var x in res.data) {
+              const src = res.data[x].send_ip;
+              const dst = res.data[x].receiver_ip;
+              if (this.nodes[src] === undefined) {
+                var index = this.webkitDep.nodes.push({
+                  name: src,
+                  value: 1,
+                  category: res.data[x].sender_tag,
+                  size: this.nodeSize[depth],
+                });
+                this.nodes[src] = index - 1;
+                if (depth == 2){
+                  this.count += 1
+                }
+                this.getDICOMIP(src, depth + 1);
+              }
+              if (this.nodes[dst] === undefined) {
+                var index = this.webkitDep.nodes.push({
+                  name: dst,
+                  value: 1,
+                  category: res.data[x].receiver_tag,
+                  size: this.nodeSize[depth],
+                });
+                this.nodes[dst] = index - 1;
+                if (depth == 2){
+                  this.count += 1
+                }
+                this.getDICOMIP(dst, depth + 1);
+              }
+              // console.log(this.webkitDep,src, dst)
+              this.webkitDep.links.push({
+                source: this.nodes[src],
+                target: this.nodes[dst],
+              });
+            }
+            if (depth === 2) {
+              // this.count = res.data.length;
+            } else if (depth === 3) {
+              this.midCount += 1;
+              if (this.midCount === this.count) {
+                this.getDICOMGrapth();
+              }
+            }
+            // console.log(200,this.count, this.midCount)
+          } else {
+            if (depth === 3) {
+              this.midCount += 1;
+              if (this.midCount === this.count) {
+                this.getDICOMGrapth();
+              }
+            }
+            //  console.log( 'others',this.count, this.midCount)
+          }
+        })
+        .catch((err) => {
+          if (depth === 3) {
+            this.midCount += 1;
+            if (this.midCount === this.count) {
+              this.getDICOMGrapth();
+            }
+          }
+          //  console.log('error',this.count, this.midCount)
+        });
+    },
+    getDICOMGrapth() {
+      // console.log('here')
+      // console.log(this.myChart)
+      if (this.myChart === "") {
+        // this.initDICOMGrapth()
+      } else {
+        this.myChart.dispose();
+      }
+      this.initDICOMGrapth();
+      // this.myChart.setOption(this.options_graph)
+    },
+    initDICOMGrapth() {
+      // console.log('init')
+      const chart = this.$refs.chart;
+      if (chart) {
+        const myChart = this.$echarts.init(chart);
+        myChart.setOption(this.options_graph);
+        window.addEventListener("resize", function () {
+          myChart.resize();
+        });
+        this.myChart = myChart;
+        // console.log(this.myChart)
+      }
+      this.$on("hook:destroyed", () => {
+        window.removeEventListener("resize", function () {
+          myChart.resize();
+        });
+      });
+    },
     downloadPicture({ index, row }) {
       window.open(
         "http://10.246.174.203:5000/picture/download/" + row.image_path

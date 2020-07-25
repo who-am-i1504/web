@@ -1,5 +1,51 @@
 import request from '@/plugin/axios'
 
+
+export function AllHL7Graph() {
+  return request({
+      url: '/monitor/hl7_all_graph',
+      method: 'get',
+  })
+}
+
+export function AllDICOMGraph() {
+  return request({
+      url: '/monitor/dicom_all_graph',
+      method: 'get',
+  })
+}
+
+export function AllASTMGraph() {
+  return request({
+      url: '/monitor/astm_all_graph',
+      method: 'get',
+  })
+}
+
+export function HL7Graph(data) {
+  return request({
+      url: '/monitor/hl7_graph',
+      method: 'post',
+      data
+  })
+}
+
+export function DICOMGraph(data) {
+  return request({
+      url: '/monitor/dicom_graph',
+      method: 'post',
+      data
+  })
+}
+
+export function ASTMGraph(data) {
+  return request({
+      url: '/monitor/astm_graph',
+      method: 'post',
+      data
+  })
+}
+
 export function monitorCount() {
   return request({
       url: '/monitor/count',

@@ -1,5 +1,5 @@
 <template>
-  <div style="cursor: pointer">
+  <div style="cursor: pointer"  @click="handleClick">
       <el-link :type="type">{{text}}</el-link>
   </div>
 </template>
@@ -32,6 +32,11 @@ export default {
     //   }
     //   return this.value ? '是' : '否'
         return this.scope.row.receiver_ip_port
+    }
+  },
+  methods:{
+    handleClick(evt){
+      this.$emit('click', evt)
     }
   }
 }

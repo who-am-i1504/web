@@ -71,6 +71,20 @@
       @row-edit="handleRowEdit"
       :loading="loading"
     >
+      <template slot="sender_tagSlot" slot-scope="scope">
+        <send-cell
+          :value="scope.row.sender_tag"
+          :scope="scope"
+          @click="showGraph(scope.row.send_ip_port, scope.row.sender_tag)"
+        ></send-cell>
+      </template>
+      <template slot="receiver_tagSlot" slot-scope="scope">
+        <receiver-cell
+          :value="scope.row.receiver_tag"
+          :scope="scope"
+          @click="showGraph(scope.row.receiver_ip_port, scope.row.receiver_tag)"
+        ></receiver-cell>
+      </template>
       <template slot="expandSlot" slot-scope="scope">
         <el-input type="textarea" placeholder="内容" :rows="5" v-model="scope.row.content"></el-input>
         <!-- <div> -->
@@ -111,13 +125,25 @@
         @prev-click="handlePaginationPrevClick"
         @next-click="handlePaginationNextClick"
       ></el-pagination>
+      <el-dialog
+        title="关系网络图"
+        :visible.sync="dialogVisible"
+        width="50%"
+        :before-close="handleClose"
+      >
+        <div ref="chart" style="width:100%;height:400px"></div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </d2-container>
 </template>
 
 <script>
 // import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
-import { getMonitorASTM } from "@api/monitor";
+import { getMonitorASTM, ASTMGraph } from "@api/monitor";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
@@ -126,6 +152,10 @@ import receiverCell from "./component/receiverCell";
 import { getAstmDataById } from "@/api/medical.data";
 Vue.component("SplitPane", SplitPane);
 export default {
+  components:{
+    sendCell,
+    receiverCell
+  },
   data() {
     return {
       content: "",
@@ -156,9 +186,10 @@ export default {
           key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
-          component: {
-            name: sendCell
-          }
+          // component: {
+          //   name: sendCell
+          // }
+          rowSlot: true,
         },
         // {
         //   title:'发送方',
@@ -171,9 +202,10 @@ export default {
           key: "receiver_tag",
           align: "center",
           showOverflowTooltip: true,
-          component: {
-            name: receiverCell
-          }
+          // component: {
+          //   name: receiverCell
+          // }
+          rowSlot: true,
         },
         // {
         //   title:'接收方',
@@ -265,7 +297,33 @@ export default {
         "消息大小（单位：字节）",
         "消息版本",
         "消息发送时间"
-      ]
+      ],
+      webkitDep: {
+        type: "force",
+        nodes: [],
+        links: [],
+        categories: [
+          {
+            name: "正常IP",
+            keyword: {},
+            base: "HTMLElement",
+          },
+          {
+            name: "可疑IP",
+            keyword: {},
+            base: "WebGLRenderingContext",
+          },
+        ],
+      },
+      nodes: {},
+      midCount: 0,
+      count: 0,
+      nodeSize: {
+        1: 50,
+        2: 35,
+        3: 10,
+      },
+      myChart: "",
     };
   },
   watch: {
@@ -286,12 +344,171 @@ export default {
     },
     whichShow: function() {
       return !this.searching;
-    }
+    },
+    options_graph: function () {
+      const webkitDep = this.webkitDep;
+      return {
+        title: {
+            text: 'ASTM局部网络结构',
+            subtext: 'Default layout',
+            top: 'bottom',
+            left: 'right'
+        },
+        legend: {
+          data: webkitDep.categories,
+        },
+        series: [
+          {
+            type: "graph",
+            layout: "force",
+            animation: false,
+            label: {
+              position: "right",
+              formatter: "{b}",
+            },
+            draggable: true,
+            data: webkitDep.nodes.map(function (node, idx) {
+              return {
+                symbolSize: node.size,
+                id: idx,
+                name: node.name,
+                value: node.value,
+                category: node.category,
+              };
+            }),
+            categories: webkitDep.categories,
+            force: {
+              edgeLength: 100,
+              repulsion: 200,
+              gravity: 0.2,
+            },
+            edges: webkitDep.links,
+          },
+        ],
+      };
+    },
   },
   mounted() {
     this.fetchData();
   },
   methods: {
+    showGraph(ip_port, tag) {
+      this.midCount = 0;
+      this.count = 0;
+      this.dialogVisible = true;
+      const ip = ip_port.substring(0, ip_port.lastIndexOf(":"));
+      this.webkitDep.nodes = [];
+      this.webkitDep.links = [];
+      this.nodes = {};
+      var x = this.webkitDep.nodes.push({
+        name: ip,
+        value: 1,
+        category: tag ? 1 : 0,
+        size: this.nodeSize[1],
+      });
+      this.nodes[ip] = x - 1;
+      this.getASTMIP(ip, 2);
+    },
+    getASTMIP(ip, depth) {
+      if (depth > 3) return;
+      ASTMGraph({
+        ip: ip,
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            for (var x in res.data) {
+              const src = res.data[x].send_ip;
+              const dst = res.data[x].receiver_ip;
+              if (this.nodes[src] === undefined) {
+                var index = this.webkitDep.nodes.push({
+                  name: src,
+                  value: 1,
+                  category: res.data[x].sender_tag,
+                  size: this.nodeSize[depth],
+                });
+                this.nodes[src] = index - 1;
+                if (depth == 2){
+                  this.count += 1
+                }
+                this.getASTMIP(src, depth + 1);
+              }
+              if (this.nodes[dst] === undefined) {
+                var index = this.webkitDep.nodes.push({
+                  name: dst,
+                  value: 1,
+                  category: res.data[x].receiver_tag,
+                  size: this.nodeSize[depth],
+                });
+                this.nodes[dst] = index - 1;
+                if (depth == 2){
+                  this.count += 1
+                }
+                this.getASTMIP(dst, depth + 1);
+              }
+              // console.log(this.webkitDep,src, dst)
+              this.webkitDep.links.push({
+                source: this.nodes[src],
+                target: this.nodes[dst],
+              });
+            }
+            if (depth === 2) {
+              // this.count = res.data.length;
+            } else if (depth === 3) {
+              this.midCount += 1;
+              if (this.midCount === this.count) {
+                this.getASTMGrapth();
+              }
+            }
+            // console.log(200,this.count, this.midCount)
+          } else {
+            if (depth === 3) {
+              this.midCount += 1;
+              if (this.midCount === this.count) {
+                this.getASTMGrapth();
+              }
+            }
+            //  console.log( 'others',this.count, this.midCount)
+          }
+        })
+        .catch((err) => {
+          if (depth === 3) {
+            this.midCount += 1;
+            if (this.midCount === this.count) {
+              this.getASTMGrapth();
+            }
+          }
+           console.log('error',this.count, this.midCount)
+        });
+    },
+    getASTMGrapth() {
+      console.log('here')
+      // console.log(this.myChart)
+      if (this.myChart === "") {
+        // this.initASTMGrapth()
+      } else {
+        this.myChart.dispose();
+      }
+      this.initASTMGrapth();
+      // this.myChart.setOption(this.options_graph)
+    },
+    initASTMGrapth() {
+      // console.log('init')
+      const chart = this.$refs.chart;
+      if (chart) {
+        const myChart = this.$echarts.init(chart);
+        myChart.setOption(this.options_graph);
+        window.addEventListener("resize", function () {
+          myChart.resize();
+        });
+        this.myChart = myChart;
+        // console.log(this.myChart)
+      }
+      this.$on("hook:destroyed", () => {
+        window.removeEventListener("resize", function () {
+          myChart.resize();
+        });
+      });
+    },
     handleClose(done) {
       done();
     },

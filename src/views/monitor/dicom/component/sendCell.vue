@@ -1,5 +1,5 @@
 <template>
-  <div style="cursor: pointer">
+  <div style="cursor: pointer"  @click="handleClick">
       <el-link :type="type">{{text}}</el-link>
   </div>
 </template>
@@ -31,8 +31,12 @@ export default {
     //     return '通过scope拿到了当前行日期：' + this.scope.row.date
     //   }
     //   return this.value ? '是' : '否'
-    // console.log(scope)
         return this.scope.row.send_ip_port
+    }
+  },
+  methods:{
+    handleClick(evt){
+      this.$emit('click', evt)
     }
   }
 }
