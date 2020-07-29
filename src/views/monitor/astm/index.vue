@@ -130,10 +130,17 @@
         :visible.sync="dialogVisible"
         width="50%"
         :before-close="handleClose"
+        v-bind="dialogOptions"
+        :class="{'d2-crud-dialog':true}"
       >
-        <div ref="chart" style="width:100%;height:400px"></div>
+        <template slot="title">
+        关系网络图
+        <slot name="FormHeaderSlot" />
+        <button v-if="dialogOptions.fullscreen!=null" type="button"  class="el-dialog__headerbtn fullscreen" @click="dialogOptions.fullscreen = !dialogOptions.fullscreen" ><i class="el-dialog__close el-icon el-icon-full-screen"></i></button>
+        </template>
+
+        <div ref="chart" style="width:100%;height:70vh;"></div>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
         </span>
       </el-dialog>
@@ -159,6 +166,9 @@ export default {
   data() {
     return {
       content: "",
+      dialogOptions:{
+        fullscreen:false
+      },
       dialogVisible: false,
       currentTableData: [],
       multipleSelection: [],
@@ -226,7 +236,7 @@ export default {
         //   showOverflowTooltip:true
         // },
         {
-          title: "数据大小(byte)",
+          title: "数据大小",
           key: "size",
           width: 90,
           align: "center",
@@ -294,7 +304,7 @@ export default {
         "消息ID",
         "密码",
         "消息序列号",
-        "消息大小（单位：字节）",
+        "消息大小",
         "消息版本",
         "消息发送时间"
       ],
@@ -367,6 +377,7 @@ export default {
               formatter: "{b}",
             },
             draggable: true,
+            roam: true,
             data: webkitDep.nodes.map(function (node, idx) {
               return {
                 symbolSize: node.size,
@@ -380,7 +391,7 @@ export default {
             force: {
               edgeLength: 100,
               repulsion: 200,
-              gravity: 0.2,
+              // gravity: 0.2,
             },
             edges: webkitDep.links,
           },
@@ -481,7 +492,7 @@ export default {
         });
     },
     getASTMGrapth() {
-      console.log('here')
+      // console.log('here')
       // console.log(this.myChart)
       if (this.myChart === "") {
         // this.initASTMGrapth()
@@ -497,9 +508,9 @@ export default {
       if (chart) {
         const myChart = this.$echarts.init(chart);
         myChart.setOption(this.options_graph);
-        window.addEventListener("resize", function () {
+        window.onresize = () => {
           myChart.resize();
-        });
+        };
         this.myChart = myChart;
         // console.log(this.myChart)
       }
@@ -834,5 +845,23 @@ export default {
 .place {
   @extend %unable-select;
   align-items: center;
+}
+.d2-crud-dialog{
+  .el-dialog__headerbtn{
+    padding:10px;
+    top:12px;
+    &.fullscreen {
+      right:55px;
+    }
+  }
+  &.d2p-drag-dialog{
+    .is-fullscreen{
+      left:0px !important;
+      top:0px !important;
+      .el-dialog__header{
+        cursor: auto !important;
+      }
+    }
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <d2-container >
+  <d2-container>
     <!-- <d2-module-index-banner slot="header" v-bind="banner"/> 
     <d2-module-index-menu :menu="menu"/>-->
     <!-- <template slot="header" style="margin-bottom: 5px">
@@ -11,26 +11,30 @@
     </template>-->
     <template slot="header">
       <div class="d2-page-cover">
-        <p class="d2-page-cover__title">疑似医疗数据传输泄露情况</p>
+        <p class="d2-page-cover__title">疑似医疗数据传输泄露概述</p>
       </div>
     </template>
+
     <div class="page">
-    <el-carousel class="d2-page-cover1" height="100%" trigger="click">
-    <el-carousel-item>
-      <div class="inner">
-        <ve-ring :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-ring>
-      </div>
-    </el-carousel-item>
-     <el-carousel-item>
-      <div ref="hl7chart" style="width:100%; height:100%"></div>
-    </el-carousel-item>
-     <el-carousel-item>
-        <div ref="dicomchart" style="width:100%; height:100%"></div>
-    </el-carousel-item>
-     <el-carousel-item>
-      <div ref="astmchart" style="width:100%; height:100%"></div>
-    </el-carousel-item>
-  </el-carousel>
+      <el-carousel class="d2-page-cover1" height="100%" trigger="click">
+        <el-carousel-item>
+          <!-- <el-card> -->
+          <!-- <div class="inner">
+              <ve-ring :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-ring>
+          </div>-->
+          <!-- </el-card> -->
+          <div ref="allchart" style="width:100%;height:100%" />
+        </el-carousel-item>
+        <el-carousel-item>
+          <div ref="hl7chart" style="width:100%; height:100%"></div>
+        </el-carousel-item>
+        <el-carousel-item>
+          <div ref="dicomchart" style="width:100%; height:100%"></div>
+        </el-carousel-item>
+        <el-carousel-item>
+          <div ref="astmchart" style="width:100%; height:100%"></div>
+        </el-carousel-item>
+      </el-carousel>
     </div>
     <!-- <el-card style="margin: -20px; height:400px">
       
@@ -43,7 +47,7 @@
     </el-card>
     <el-card style="margin: -20px; height:400px">
       
-    </el-card> -->
+    </el-card>-->
   </d2-container>
 </template>
 
@@ -66,10 +70,10 @@ export default {
     // }
     return {
       menu,
-      banner: {
-        title: "HL7规则管理",
-        subTitle: "在这里可以进行HL7规则的添加,删除,更改等功能",
-      },
+      // banner: {
+      //   title: "HL7规则管理",
+      //   subTitle: "在这里可以进行HL7规则的添加,删除,更改等功能",
+      // },
       chartSettings: {
         // radius: 150,
         // offsetY:250,
@@ -112,6 +116,53 @@ export default {
     newChartData: function () {
       return this.chartData;
     },
+    all_options: function () {
+      var data = [];
+      var columns = [];
+      for (var x in this.chartData.rows) {
+        data.push({
+          value: this.chartData.rows[x]["数量"],
+          name: this.chartData.rows[x]["协议类型"],
+        });
+        columns.push(this.chartData.rows[x]["协议类型"]);
+      }
+      var option = {
+        tooltip: {
+          trigger: "item",
+          formatter: "{a} <br/>{b}: {c} ({d}%)",
+        },
+        legend: {
+          // orient: "vertical",
+          // top:100,
+          // left: 100,
+          data: columns,
+        },
+        series: [
+          {
+            name: "可疑传输",
+            type: "pie",
+            radius: ["40%", "50%"],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: "center",
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: "20",
+                fontWeight: "bold",
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            data: data,
+          },
+        ],
+      };
+      return option;
+    },
   },
   mounted() {
     this.fetchData();
@@ -123,9 +174,9 @@ export default {
     options(webkitDep) {
       return {
         title: {
-            // subtext: 'Default layout',
-            top: 'top',
-            left: 'right'
+          // subtext: 'Default layout',
+          top: "top",
+          left: "right",
         },
         legend: {
           data: webkitDep.categories,
@@ -155,7 +206,7 @@ export default {
             force: {
               edgeLength: 100,
               repulsion: 100,
-              gravity: 0.5,
+              // gravity: 0.5,
             },
             edges: webkitDep.links,
           },
@@ -220,7 +271,7 @@ export default {
       if (chart) {
         const myChart = this.$echarts.init(chart);
         const option = this.options(webkitDep);
-        option.title['text'] = 'HL7网络拓扑图'
+        option.title["text"] = "HL7网络拓扑图";
         myChart.setOption(option);
         window.addEventListener("resize", function () {
           myChart.resize();
@@ -290,7 +341,7 @@ export default {
       if (chart) {
         const myChart = this.$echarts.init(chart);
         const option = this.options(webkitDep);
-        option.title['text'] = 'DICOM网络拓扑图'
+        option.title["text"] = "DICOM网络拓扑图";
         myChart.setOption(option);
         window.addEventListener("resize", function () {
           myChart.resize();
@@ -360,7 +411,7 @@ export default {
       if (chart) {
         const myChart = this.$echarts.init(chart);
         const option = this.options(webkitDep);
-        option.title['text'] = 'ASTM网络拓扑图'
+        option.title["text"] = "ASTM网络拓扑图";
         myChart.setOption(option);
         window.addEventListener("resize", function () {
           myChart.resize();
@@ -381,6 +432,22 @@ export default {
               message: res.message,
               type: "warning",
             });
+          } else {
+            const chart = this.$refs.allchart;
+            if (chart) {
+              const myChart = this.$echarts.init(chart);
+              const option = this.all_options;
+              // option.title["text"] = "";
+              myChart.setOption(option);
+              window.addEventListener("resize", function () {
+                myChart.resize();
+              });
+            }
+            this.$on("hook:destroyed", () => {
+              window.removeEventListener("resize", function () {
+                myChart.resize();
+              });
+            });
           }
         })
         .catch((err) => {
@@ -400,6 +467,8 @@ export default {
   right: 20px;
   bottom: 20px;
   left: 20px;
+  height: 100%;
+  width: 100%;
 }
 .d2-page-cover {
   @extend %unable-select;
@@ -417,15 +486,16 @@ export default {
 }
 .page {
   @extend %unable-select;
-  $backgroundColor: #f0f2f5;
+  // $backgroundColor: #f0f2f5;
+  background-color: rgba(white, 0);
   // ---
-  background-color: $backgroundColor;
+  // background-color: $backgroundColor;
   height: 100%;
   position: relative;
-  
 }
 .d2-page-cover1 {
   height: 100%;
+  background-color: rgba(white, 0);
   align-items: center;
 }
 </style>
