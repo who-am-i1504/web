@@ -341,6 +341,8 @@ export default {
               formatter: "{b}",
             },
             draggable: true,
+            focusNodeAdjacency: true,
+            edgeSymbol: ['', 'arrow'],
             data: webkitDep.nodes.map(function (node, idx) {
               // console.log(node)
               return {

@@ -378,6 +378,8 @@ export default {
             },
             draggable: true,
             roam: true,
+            focusNodeAdjacency: true,
+            edgeSymbol: ['', 'arrow'],
             data: webkitDep.nodes.map(function (node, idx) {
               return {
                 symbolSize: node.size,

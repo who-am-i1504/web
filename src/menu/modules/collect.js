@@ -1,36 +1,36 @@
 export default {
   path: '/collect',
   title: '医疗数据采集',
-  icon: 'flask',
+  iconSvg: 'collect',
   children: (pre => [{
       path: `${pre}index`,
       title: '医疗数据采集',
-      icon: 'home'
+      icon: 'area-chart'
     },
     {
       path: `${pre}manager`,
       title: '采集数据管理',
-      iconSvg: 'd2-admin',
+      iconSvg: 'config',
     },
     {
       path: `${pre}position`,
       title: 'IP地址定位',
-      icon: 'bolt'
+      iconSvg: 'place',
     },
     {
       path: `${pre}hl7`,
       title: 'HL7采集数据管理',
-      icon: 'folder-o',
+      iconSvg: 'hl7',
     },
     {
         path: `${pre}dicom`,
         title: 'DICOM采集数据管理',
-        icon: 'folder-o'
+        iconSvg: 'DICOM',
     },
     {
         path: `${pre}astm`,
         title: 'ASTM采集数据管理',
-        icon: 'folder-o'
+        iconSvg: 'ASTM',
     }
     
   ])('/collect/')

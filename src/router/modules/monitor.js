@@ -13,7 +13,7 @@ export default {
   name: 'monitor',
   meta,
   redirect: {
-    name: 'monitor-rule'
+    name: 'monitor-index'
   },
   component: layoutHeaderAside,
   children: (pre => [{

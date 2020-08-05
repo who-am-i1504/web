@@ -1,5 +1,22 @@
 import request from '@/plugin/axios'
 
+
+export function changePwd(data) {
+  return request({
+    url: '/user/updatePassword',
+    method: 'post',
+    data
+  })
+}
+
+export function getUserLog(data) {
+  return request({
+    url: '/user/log',
+    method: 'post',
+    data
+  })
+}
+
 export function getUserList(data) {
   return request({
     url: '/user/list',

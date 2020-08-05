@@ -10,10 +10,10 @@ const meta = {
 
 export default {
   path: '/transfer',
-  name: 'demo-playground',
+  name: 'transfer',
   meta,
   redirect: {
-    name: 'transfer-rule'
+    name: 'transfer-index'
   },
   component: layoutHeaderAside,
   children: (pre => [{

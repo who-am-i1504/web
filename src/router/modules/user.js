@@ -9,10 +9,10 @@ const meta = {
 
 export default {
   path: '/user',
-  name: 'user-manager',
+  name: 'user',
   meta,
   redirect: {
-    name: 'transfer-rule'
+    name: 'user-password'
   },
   component: layoutHeaderAside,
   children: (pre => [{
@@ -33,6 +33,16 @@ export default {
         ...meta,
         cache: true,
         title: '用户管理'
+      }
+    },
+    {
+      path: 'log',
+      name: `${pre}log`,
+      component: _import('user/log'),
+      meta: {
+        ...meta,
+        cache: true,
+        title: '用户日志'
       }
     }
   ])('user-')

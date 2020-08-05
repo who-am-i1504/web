@@ -13,7 +13,7 @@ export default {
   name: 'collectRule',
   meta,
   redirect: {
-    name: 'collect'
+    name: 'collectRule-index'
   },
   component: layoutHeaderAside,
   children: (pre => [{

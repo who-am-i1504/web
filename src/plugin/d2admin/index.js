@@ -3,7 +3,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // import D2Crud from 'd2-crud-x'
 import D2Crud from '@/d2crud'
-import '@/d2crud'
+// import '@/d2crud'
 // flex 布局库
 import 'flex.css'
 // 组件

@@ -7,14 +7,14 @@
         注销
       </el-dropdown-item>
       <el-dropdown-item @click.native="ChangePassword">
-        <d2-icon name="plus" class="d2-mr-5"/>
+        <d2-icon-svg name="password-change" style="width: 12px; height: 12px;"/>
         更改密码
       </el-dropdown-item>
       <el-dropdown-item v-if="info.authority && (info.authority & (info.roles['SuperAdmin'] | info.roles['Admin'] | info.roles['ReaderAdmin'] | info.roles['EditorAdmin'] )) > 0" @click.native="ManagerUser">
         <d2-icon name="plus" class="d2-mr-5"/>
         用户管理
       </el-dropdown-item>
-      <el-dropdown-item v-if="info.authority && info.authority === 1" @click.native="logReader">
+      <el-dropdown-item v-if="info.authority && (info.authority & (info.roles['SuperAdmin'] | info.roles['Admin'] | info.roles['ReaderAdmin'] | info.roles['EditorAdmin'] )) > 0" @click.native="logReader">
         <d2-icon name="dot-circle-o" class="d2-mr-5"/>
         用户日志
       </el-dropdown-item>
@@ -31,9 +31,9 @@ export default {
   data() {
     return {
       setting: [
-        { title: '更改密码', name: 'password', path: 'password', component: 'password' },
-        { title: '管理其他用户', name: 'manager', path: 'manager', component: 'manager' },
-        { title: '追加页面 3', name: 'add-routes-3', path: 'add-routes/3', component: '3' }
+        { title: '更改密码', name: 'user-password', path: 'password', component: 'password' },
+        { title: '管理其他用户', name: 'user-manager', path: 'manager', component: 'manager' },
+        { title: '用户日志', name: 'user-log', path: 'log', component: 'userlog' }
       ]
     }
   },
@@ -109,7 +109,7 @@ export default {
       this.onClick(this.setting[1])
     },
     logReader(){
-
+      this.onClick(this.setting[2])
     },
     onClick ({ title, name, path, component }) {
       // vue router 的设计暂时不能支持在路由示例上访问动态添加的路由

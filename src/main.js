@@ -18,9 +18,6 @@ import vueJsonTreeView from 'vue-json-tree-view'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import SplitPane from 'vue-splitpane'
 import Viewer from 'v-viewer'
-import echarts from 'echarts'
-
-Vue.prototype.$echarts = echarts
 
 Vue.component('SplitPane', SplitPane)
 Vue.component('d2-grid-layout', GridLayout)

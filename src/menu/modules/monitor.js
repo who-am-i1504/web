@@ -1,36 +1,36 @@
 export default {
   path: '/monitor',
   title: '数据监测',
-  icon: 'flask',
+  iconSvg: 'monitor',
   children: (pre => [{
       path: `${pre}index`,
       title: '监测数据',
-      icon: 'home'
+      iconSvg: 'graph'
     },
     {
       path: `${pre}rule`,
       title: '监测黑名单管理',
-      iconSvg: 'd2-admin'
+      iconSvg: 'black'
     },
     {
       path: `${pre}port`,
       title: '端口主动发现',
-      iconSvg: 'd2-admin'
+      icon: 'eye'
     },
     {
       path: `${pre}hl7`,
       title: 'HL7传输监测',
-      iconSvg: 'd2-admin'
+      iconSvg: 'hl7'
     },
     {
       path: `${pre}dicom`,
       title: 'DICOM传输监测',
-      iconSvg: 'd2-admin'
+      iconSvg: 'DICOM'
     },
     {
       path: `${pre}astm`,
       title: 'ASTM传输监测',
-      iconSvg: 'd2-admin'
+      iconSvg: 'ASTM'
     }
   ])('/monitor/')
 }

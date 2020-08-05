@@ -1,16 +1,16 @@
 export default {
   path: '/transfer',
   title: '传输规则',
-  icon: 'flask',
+  icon: 'list-ol',
   children: (pre => [{
       path: `${pre}index`,
       title: '传输规则管理',
-      icon: 'home'
+      icon: 'pie-chart'
     },
     {
       path: `${pre}hl7`,
       title: 'HL7传输规则管理',
-      iconSvg: 'd2-admin',
+      iconSvg: 'hl7',
       // children: [
       //   { title: 'add', iconSvg: 'add' }
       //   { title: 'alarm', iconSvg: 'alarm' },
@@ -29,7 +29,7 @@ export default {
     {
       path: `${pre}dicom`,
       title: 'DICOM传输规则管理',
-      icon: 'folder-o',
+      iconSvg: 'DICOM',
       // children: [
       //   {
       //     title: 'add',
@@ -49,7 +49,7 @@ export default {
     {
       path: `${pre}astm`,
       title: 'ASTM传输规则管理',
-      icon: 'bolt',
+      iconSvg: 'ASTM',
       // children: [
       //   {
       //     title: 'add',
