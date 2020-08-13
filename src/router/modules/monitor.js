@@ -22,7 +22,7 @@ export default {
       component: _import('monitor/index'),
       meta: {
         ...meta,
-        title: '监测规则首页'
+        title: '疑似数据泄露'
       }
     },
     {

@@ -1,5 +1,67 @@
 <template>
-  <d2-container>
+  <d2-container better-scroll>
+    <div slot="header">
+      <SplitPane
+        :min-percent="10"
+        style="margin: 10px; bottom-margin: 25px; height:2vh;"
+        :default-percent="80"
+        split="vertical"
+      >
+        <SplitPane slot="paneL" :min-percent="10" :default-percent="50" split="vertical">
+          <div class="panel-search" slot="paneL">
+            <el-input class="panel-search__input" placeholder="uuid" v-model="uuid">
+              <el-button @click="getLogByUUID" slot="append">
+                <d2-icon name="search" />搜索
+              </el-button>
+            </el-input>
+          </div>
+          <div class="panel-search" slot="paneR">
+            <el-input class="panel-search__input" placeholder="用户名" v-model="username">
+              <el-button @click="getLogByName" slot="append">
+                <d2-icon name="search" />搜索
+              </el-button>
+            </el-input>
+          </div>
+        </SplitPane>
+        <!-- <div slot="paneR"> -->
+        <SplitPane
+          slot="paneR"
+          v-if="info.authority & 32"
+          :min-percent="10"
+          :default-percent="50"
+          split="vertical"
+        >
+          <div slot="paneL" class="panel-search">
+            <el-button
+              class="panel-search__input"
+              type="primary"
+              icon="el-icon-refresh-right"
+              circle
+              @click="reset"
+            ></el-button>
+          </div>
+          <div slot="paneR" class="panel-search">
+            <el-button
+              class="panel-search__input"
+              type="danger"
+              icon="el-icon-delete"
+              circle
+              @click="deleteSelection"
+            ></el-button>
+          </div>
+        </SplitPane>
+        <div v-else slot="paneR" class="panel-search">
+          <el-button
+            class="panel-search__input"
+            type="primary"
+            icon="el-icon-refresh-right"
+            circle
+            @click="reset"
+          ></el-button>
+        </div>
+        <!-- </div> -->
+      </SplitPane>
+    </div>
     <!-- <el-table
       :data="log"
       size="mini"
@@ -66,38 +128,304 @@
           </el-button>
         </template>
       </el-table-column>
-    </el-table> -->
-    <d2-crud-x>
-    </d2-crud-x>
-    <el-button
-      slot="footer"
-      type="primary"
-      size="mini"
-      :loading="uploading"
-      @click="handleUpload">
-      <d2-icon name="cloud-download"/>
-      下载日志文件
-    </el-button>
+    </el-table>-->
+    <!-- <d2-crud-x
+      ref="d2Crud"
+      v-bind="_crudProps"
+      v-on="_crudListeners">
+    </d2-crud-x>-->
+    <d2-crud
+      v-if="info.authority & 32"
+      selection-row
+      :selectionRow="selectionRow"
+      ref="d2Crud"
+      :columns="columns"
+      :data="data"
+      :form-options="options"
+      :loading="loading"
+      @selection-change="handleSelectionChange"
+    ></d2-crud>
+
+    <d2-crud
+      v-else
+      ref="d2Crud"
+      :columns="columns"
+      :data="data"
+      :form-options="options"
+      :loading="loading"
+    ></d2-crud>
+
+    <div slot="footer">
+      <el-card style="height:100%; margin: -10px;">
+        <SplitPane :min-percent="10" style="margin: -15px;" :default-percent="90" split="vertical">
+          <el-pagination
+            slot="paneL"
+            @current-page="pagination.page"
+            :page-size="pagination.pageSize"
+            :total="pagination.total"
+            :page-sizes="[10, 20, 30, 40]"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="paginationCurrentChange"
+            @prev-click="handlePaginationPrevClick"
+            @next-click="handlePaginationNextClick"
+          />
+          <el-button
+            slot="paneR"
+            type="primary"
+            size="mini"
+            :loading="uploading"
+            @click="handleUpload"
+          >
+            <d2-icon name="cloud-download" />下载日志文件
+          </el-button>
+        </SplitPane>
+      </el-card>
+    </div>
   </d2-container>
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { get } from 'lodash'
+import { mapState, mapActions, mapMutations } from "vuex";
+// import { crudOptions } from './crud'
+// import { d2CrudPlus } from 'd2-crud-plus'
+import { get } from "lodash";
+import { getLog, getLogByUUID, getLogByName, deleteLog } from "@/api/log.data";
 export default {
-  data () {
+  // mixins:[d2CrudPlus.crud],
+  data() {
     return {
-      uploading: false
-    }
+      state: 1,
+      uuid: "",
+      username: "",
+      uploading: false,
+      loading: false,
+      options: {
+        height: "100%",
+        mini: true,
+      },
+      selectionRow: {
+        align: "center",
+        width: 90,
+      },
+      selection: [],
+      columns: [
+        {
+          title: "时间",
+          key: "time",
+          type: "datetime",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+          form: {
+            component: {
+              props: {
+                format: "YYYY-MM-DD HH:mm",
+                valueFormat: "yyyy-MM-dd HH:mm",
+              },
+            },
+          },
+          component: {
+            props: {
+              format: "YYYY-MM-DD HH:mm",
+            },
+          },
+        },
+        {
+          title: "请求内容",
+          key: "request",
+          search: {
+            disable: true,
+          },
+        },
+        {
+          title: "Url",
+          key: "url",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+        },
+        {
+          title: "响应内容",
+          key: "response",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+        },
+        {
+          title: "IP地址",
+          key: "ip",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+        },
+        {
+          title: "uuid",
+          key: "uuid",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+        },
+        {
+          title: "用户名",
+          key: "username",
+          sortable: true,
+          search: {
+            disable: true,
+          },
+        },
+      ],
+      mid_data: [],
+      pagination: {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        pageCount: 9,
+        layout: "prev, pager, next, jumper, ->, total, slot",
+      },
+    };
   },
   computed: {
-    ...mapState('d2admin/log', [
-      'log'
-    ])
+    ...mapState("d2admin/user", ["info"]),
+    data: function () {
+      return this.mid_data;
+    },
+  },
+  mounted() {
+    this.fetchData();
   },
   methods: {
-    get,
-    handleShowMore (log) {
+    deleteSelection() {
+      var length = this.selection.length;
+      var count = 0;
+      var suc = 0;
+      for (var x in this.selection) {
+        var req = {};
+        req["id"] = this.selection[x]["id"];
+        deleteLog({
+          ...req,
+        })
+          .then((res) => {
+            if (res.status === 200) {
+              suc++;
+            }
+            count += 1;
+            if (count === length) {
+              this.$notify({
+                title: "批量删除",
+                message:
+                  "成功删除  " + suc + "条，失败  " + (count - suc) + "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$notify({
+                title: "批量删除",
+                message:
+                  "成功删除  " + suc + "条，失败  " + (count - suc) + "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
+    handleSelectionChange(val) {
+      this.selection = val;
+    },
+    reset() {
+      this.state = 1;
+      this.pagination.page = 1;
+      this.fetchData();
+    },
+    getLogByUUID() {
+      this.state = 2;
+      this.fetchData();
+    },
+    getLogByName() {
+      this.state = 3;
+      this.fetchData();
+    },
+    handleSizeChange(val) {
+      this.pagination.pageSize = val;
+      this.fetchData();
+    },
+    paginationCurrentChange(val) {
+      this.pagination.page = val;
+      this.fetchData();
+    },
+    handlePaginationPrevClick(val) {
+      this.pagination.page = val;
+      this.fetchData();
+    },
+    handlePaginationNextClick(val) {
+      this.pagination.page = val;
+      this.fetchData();
+    },
+    paginationCurrentChange(page) {
+      this.pagination.page = page;
+      this.fetchData();
+    },
+    fetchData() {
+      var req = {};
+      req["page"] = this.pagination.page;
+      req["pageSize"] = this.pagination.pageSize;
+      if (this.state === 1) {
+        getLog({
+          ...req,
+        }).then((res) => {
+          if (res.status === 200) {
+            this.total = res.size;
+            this.mid_data = res.data;
+          } else {
+            this.$$message({
+              message: res.message,
+              type: "warning",
+            });
+          }
+        });
+      } else if (this.state === 2) {
+        req["uuid"] = this.uuid;
+        getLogByUUID({
+          ...req,
+        }).then((res) => {
+          if (res.status === 200) {
+            this.total = res.size;
+            this.mid_data = res.data;
+          } else {
+            this.$$message({
+              message: res.message,
+              type: "warning",
+            });
+          }
+        });
+      } else if (this.state === 3) {
+        req["username"] = this.username;
+        getLogByName({
+          ...req,
+        }).then((res) => {
+          if (res.status === 200) {
+            this.total = res.size;
+            this.mid_data = res.data;
+          } else {
+            this.$$message({
+              message: res.message,
+              type: "warning",
+            });
+          }
+        });
+      } else {
+        this.state = 1;
+      }
+    },
+    handleShowMore(log) {
       // 打印一条日志的所有信息到控制台
       // this.$notify({
       //   type: 'info',
@@ -112,7 +440,9 @@ export default {
       // console.groupEnd()
     },
     // 日志上传
-    handleUpload () {
+    handleUpload() {
+      window.open(
+        "http://10.246.174.203:5000/picture/log/download/")
       // this.uploading = true
       // this.$notify({
       //   type: 'info',
@@ -127,7 +457,41 @@ export default {
       //     message: '上传成功'
       //   })
       // }, 3000)
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+.panel-search {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  .panel-search__input {
+    text-align: center;
+  }
+}
+.place {
+  align-items: center;
+}
+.d2-crud-dialog {
+  .el-dialog__headerbtn {
+    padding: 10px;
+    top: 12px;
+    &.fullscreen {
+      right: 55px;
+    }
+  }
+  &.d2p-drag-dialog {
+    .is-fullscreen {
+      left: 0px !important;
+      top: 0px !important;
+      .el-dialog__header {
+        cursor: auto !important;
+      }
     }
   }
 }
-</script>
+</style>

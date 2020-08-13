@@ -435,8 +435,11 @@ export default {
     },
     fetchData () {
       this.loading = true
+      var req = {}
+      req['pageSize'] = this.pagination.pageSize
+      req['page'] = this.pagination.page
       getASTMRule({
-        ...this.pagination
+        ...req
       }).then(res => {
         this.mid_data = res.data
         this.pagination.total = res.size

@@ -70,6 +70,15 @@ export default {
         ...meta,
         title: 'ASTM采集数据管理'
       }
+    },
+    {
+      path: 'construct',
+      name: `${pre}construct`,
+      component: _import('collect/construct'),
+      meta: {
+        ...meta,
+        title: 'Pcap文件重组'
+      }
     }
     // { path: 'store/page', name: `${pre}store-page`, component: _import('demo/playground/store/page'), meta: { ...meta, cache: true, title: '多标签页控制' } },
     // { path: 'store/menu', name: `${pre}store-menu`, component: _import('demo/playground/store/menu'), meta: { ...meta, title: '菜单控制' } },

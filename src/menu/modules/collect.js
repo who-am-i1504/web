@@ -31,6 +31,11 @@ export default {
         path: `${pre}astm`,
         title: 'ASTM采集数据管理',
         iconSvg: 'ASTM',
+    },
+    {
+      path: `${pre}construct`,
+      title: 'Pcap文件重组',
+      iconSvg: 'ASTM',
     }
     
   ])('/collect/')

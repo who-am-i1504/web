@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
       <div style="margin: -16px;" class="panel-search">
         <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">
@@ -425,7 +425,7 @@ export default {
   methods: {
     downloadPicture({ index, row }) {
       window.open(
-        "http://10.246.174.203:5000/picture/download/" + row.image_path
+        "/picture/download/" + row.image_path
       );
     },
     // showCurdDialog({index, row}){
@@ -748,7 +748,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .panel-search {
-  @extend %unable-select;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
@@ -759,7 +758,6 @@ export default {
   }
 }
 .place {
-  @extend %unable-select;
   align-items: center;
 }
 .viewer {

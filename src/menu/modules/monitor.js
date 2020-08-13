@@ -4,7 +4,7 @@ export default {
   iconSvg: 'monitor',
   children: (pre => [{
       path: `${pre}index`,
-      title: '监测数据',
+      title: '疑似数据泄露',
       iconSvg: 'graph'
     },
     {
