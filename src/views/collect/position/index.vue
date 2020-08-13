@@ -109,11 +109,11 @@ export default {
       await this.pageClear({ instance: this, user: true });
     },
     afterSet(echarts) {
-      console.log(echarts.getModel())
-      console.log(echarts.getModel().getComponent("bmap"))
+      // console.log(echarts.getModel())
+      // console.log(echarts.getModel().getComponent("bmap"))
       var bmap = echarts.getModel().getComponent("bmap").getBMap();
       
-      bmap.addControl(new window.BMapGL.MapTypeControl());
+      bmap.addControl(new window.BMap.MapTypeControl());
       var scaleCtrl = new BMap.ScaleControl({
         anchor: BMAP_ANCHOR_BOTTOM_LEFT,
         offset: new BMap.Size(10, 40),
@@ -126,9 +126,9 @@ export default {
           
         })
       );
-      console.log()
-      var navi3DCtrl = new window.BMapGL.NavigationControl3D();
-      bmap.addControl(navi3DCtrl)
+      // console.log()
+      // var navi3DCtrl = new window.BMap.NavigationControl3D();
+      // bmap.addControl(navi3DCtrl)
       bmap.addControl(scaleCtrl);
       this.bmap = bmap;
       // this.getPoint();

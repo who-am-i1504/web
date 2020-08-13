@@ -11,7 +11,7 @@ export default {
   actions: {
     /**
      * @description 设置颜色
-     * @param {Object} context  
+     * @param {Object} context
      * @param {String} color 尺寸
      */
     async set ({ state, dispatch, commit }, color) {

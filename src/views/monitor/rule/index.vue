@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
+  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
     <template slot="header" style="background-color: rgba(#000, .7);">
       <div class="panel-search">
         <!-- style="margin: -16px; background-color:rgba(#000, .7);" -->
@@ -123,7 +123,7 @@
       height="60%"
       :before-close="handleClose"
     >
-      <el-container style="height:300px;" better-scroll>
+      <el-container style="height:300px;" >
         <el-main>
           <el-table v-bind="table">
             <el-table-column

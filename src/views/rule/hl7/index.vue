@@ -115,7 +115,7 @@
       width="60%"
       height="60%"
       :before-close="handleClose">
-        <el-container style="height:300px;" better-scroll>
+        <el-container style="height:300px;" >
           <el-main>
             <el-table v-bind="table">
               <el-table-column

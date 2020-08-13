@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
+  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
     <template slot="header">
       <div style="margin: -16px;" class="panel-search">
         <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">

@@ -111,7 +111,6 @@ export default {
       basis = 'fullPath',
       user = false
     }) {
-      console.log('here')
       return getDatabase({
         path: `$page.${router.app.$route[basis]}.$data`,
         user,

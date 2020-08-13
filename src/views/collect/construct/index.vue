@@ -1,14 +1,14 @@
 <template>
-  <d2-container better-scroll>
+  <d2-container >
     <!-- <SplitPane
       split="horizontal"
     >-->
     <!-- <div > -->
     <!-- <template slot="paneL"> -->
     <div>
-      <el-row :gutter="20" style="height:80vh;">
-        <el-col :span="10" style="height:80vh;">
-          <div class="panel-search" style="height:80vh;">
+      <el-row :gutter="20" style="height:70vh;">
+        <el-col :span="10" style="height:70vh;">
+          <div class="panel-search" style="height:70vh;">
             <el-upload
               ref="upload"
               class="upload-demo panel-search__input"
@@ -94,7 +94,7 @@ export default {
     return {
       loading:false,
       options: {
-        height: "80vh",
+        height: "70vh",
         width: "100%",
         rowKey: "id",
         size:"mini"

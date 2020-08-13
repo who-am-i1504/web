@@ -1,5 +1,5 @@
 <template>
-  <d2-container better-scroll>
+  <d2-container >
     <div slot="header">
       <SplitPane
         :min-percent="10"
@@ -442,7 +442,7 @@ export default {
     // 日志上传
     handleUpload() {
       window.open(
-        "http://10.246.174.203:5000/picture/log/download/")
+        "http://10.246.174.203:5000/picture/log/download")
       // this.uploading = true
       // this.$notify({
       //   type: 'info',

@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
       <div class="panel-search">
         <el-form :inline="true" ref="form" size="mini" class="panel-search__input">

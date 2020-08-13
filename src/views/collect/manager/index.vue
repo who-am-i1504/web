@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" better-scroll>
+  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
     <template slot="header">
       <div style="margin: 0px;">
         <div class="d2-page-cover">
