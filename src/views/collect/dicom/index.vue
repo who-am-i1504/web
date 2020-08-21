@@ -1,12 +1,58 @@
 <template>
   <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
-      <div style="margin: -16px;" class="panel-search">
-        <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">
-          <el-button @click="searchItemInForm" slot="append">
-            <d2-icon name="search" />搜索
-          </el-button>
-        </el-input>
+      <div class="panel-search">
+        <el-form :inline="true" ref="form" size="mini" class="panel-search__input">
+          <el-form-item>
+            <SplitPane
+              style="width: 150px;"
+              :min-percent="10"
+              :default-percent="80"
+              split="vertical"
+            >
+              <el-input v-model="patient_name" slot="paneL" placeholder="患者姓名" size="small"></el-input>
+              <el-checkbox
+                style="margin: 10px; margin-top: 5px;"
+                slot="paneR"
+                v-model="patient_name_tag"
+              >{{radioString}}</el-checkbox>
+            </SplitPane>
+          </el-form-item>
+
+          <el-form-item>
+            <SplitPane
+              style="width: 150px;"
+              :min-percent="10"
+              :default-percent="80"
+              split="vertical"
+            >
+              <el-input v-model="patient_id" slot="paneL" size="small" placeholder="患者ID"></el-input>
+              <el-checkbox
+                style="margin: 10px; margin-top: 5px;"
+                slot="paneR"
+                v-model="patient_id_tag"
+              >{{radioString}}</el-checkbox>
+            </SplitPane>
+          </el-form-item>
+
+          <el-form-item style="width: 150px;">
+            <el-button style="width: 100%;" @click="searchItemInForm">
+              <d2-icon name="search" />搜索
+            </el-button>
+          </el-form-item>
+
+          <el-form-item v-if="info.authority && (info.authority & 2)">
+            <el-button style="width: 100%;" type="danger" @click="deleteBatch">
+              <d2-icon name="warning" />删除
+            </el-button>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button style="width: 100%;" @click="downloadBatch">
+              <d2-icon name="download" />图片批量下载
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
     </template>
     <el-form :inline="true" size="mini">
@@ -59,6 +105,7 @@
     <d2-crud
       style="margin: -20px;"
       ref="d2Crud"
+      selection-row
       :expand-row="{title:'详情', align:'center'}"
       :options="options"
       :columns="columns"
@@ -71,7 +118,7 @@
     >
       <template slot="image_pathSlot" slot-scope="scope">
         <!-- <div> -->
-          <image-tag :value="scope.row.image_path" @click="doubleClick(scope.row)" />
+        <image-tag :value="scope.row.image_path" @click="doubleClick(scope.row)" />
         <!-- </div> -->
       </template>
       <template slot="expandSlot" slot-scope="scope">
@@ -150,7 +197,7 @@
 </template>
 
 <script>
-// import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
+import { DICOMSearch, DICOMDelete } from "@api/collect.data";
 import { getDICOMByPage } from "@/api/medical.data";
 import Vue from "vue";
 import { mapActions } from "vuex";
@@ -159,12 +206,20 @@ import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
 import ImageTag from "./component/image";
 import ImgViewer from "./component/ImgViewer";
+import { mapState } from "vuex";
+import request from "@/plugin/axiosfile";
+import axios from "axios";
+const FileDownload = require('js-file-download');
 // import {d2CrudPlus} from 'd2-crud-plus'
 Vue.component("SplitPane", SplitPane);
 export default {
   // mixins:[d2CrudPlus.crud],
   data() {
     return {
+      patient_name: "",
+      patient_id: "",
+      patient_name_tag: false,
+      patient_id_tag: false,
       formData: {},
       content: "",
       dialogVisible: false,
@@ -182,63 +237,63 @@ export default {
           align: "center",
           width: 90,
           showOverflowTooltip: true,
-          sortable:true
+          sortable: true,
         },
         {
-          title:'姓名',
-          key:'patient_name',
-          sortable:true,
-          showOverflowTooltip:true,
-          align:"center"
+          title: "姓名",
+          key: "patient_name",
+          sortable: true,
+          showOverflowTooltip: true,
+          align: "center",
         },
         {
-          title:'年龄',
-          key:'patient_age',
-          width:'50',
-          align:'center',
-          sortable:true
+          title: "年龄",
+          key: "patient_age",
+          width: "50",
+          align: "center",
+          sortable: true,
         },
         {
-          title:'患者ID',
-          key:'patient_id',
-          align:'center',
-          sortable:true
+          title: "患者ID",
+          key: "patient_id",
+          align: "center",
+          sortable: true,
         },
         {
           title: "发送方IP地址及端口号",
           key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
-          sortable:true,
+          sortable: true,
           component: {
             name: sendCell,
-            disabled: false
-          }
+            disabled: false,
+          },
         },
         {
           title: "接收方IP地址及端口号",
           key: "receiver_tag",
           align: "center",
-          sortable:true,
+          sortable: true,
           showOverflowTooltip: true,
           component: {
-            name: receiverCell
-          }
+            name: receiverCell,
+          },
         },
         {
           title: "发送时间",
           key: "time",
           align: "center",
-          sortable:true,
-          showOverflowTooltip: true
+          sortable: true,
+          showOverflowTooltip: true,
         },
         {
           title: "数据大小",
           key: "size",
           // width: 100,
-          sortable:true,
+          sortable: true,
           align: "center",
-          showOverflowTooltip: true
+          showOverflowTooltip: true,
         },
         {
           title: "图片预览",
@@ -246,11 +301,11 @@ export default {
           align: "center",
           type: "datetime",
           width: 90,
-          rowSlot: true
+          rowSlot: true,
           // component: {
           //   name: image
           // }
-        }
+        },
       ],
       rowHandle: {
         custom: [
@@ -266,9 +321,9 @@ export default {
             text: "图片下载",
             size: "small",
             fixed: "right",
-            emit: "custom-emit-2"
-          }
-        ]
+            emit: "custom-emit-2",
+          },
+        ],
       },
       mid_data: [],
       loading: false,
@@ -277,16 +332,16 @@ export default {
         pageSize: 20,
         total: 0,
         pageCount: 9,
-        layout: "prev, pager, next, jumper, ->, total, slot"
+        layout: "prev, pager, next, jumper, ->, total, slot",
       },
       formOptions: {
         saveButtonIcon: "el-icon-edit",
         saveButtonText: "修改",
-        saveLoading: false
+        saveLoading: false,
       },
       options: {
         size: "mini",
-        stripe: true
+        stripe: true,
       },
       searching: false,
       searchRequest: {},
@@ -322,7 +377,7 @@ export default {
         "high_bit",
         "window_center",
         "window_width",
-        "image_path"
+        "image_path",
       ],
       list_name: [
         "患者姓名",
@@ -355,21 +410,22 @@ export default {
         "高位",
         "窗位",
         "窗宽",
-        "图片路径"
-      ]
+        "图片路径",
+      ],
     };
   },
   components: {
     ImgViewer,
-    ImageTag
+    ImageTag,
   },
   watch: {
-    pagination: function(value) {
+    pagination: function (value) {
       this.handleSet("pagination", value);
-    }
+    },
   },
   computed: {
-    data: function() {
+    ...mapState("d2admin/user", ["info"]),
+    data: function () {
       var x;
       var i = 1;
       this.images = [];
@@ -396,7 +452,7 @@ export default {
           this.images.push({
             thumbnail: "/picture/show/" + this.mid_data[x]["image_path"],
             source: "/picture/show/" + this.mid_data[x]["image_path"],
-            title: this.mid_data[x]["order"]
+            title: this.mid_data[x]["order"],
           });
         }
         i += 1;
@@ -405,10 +461,10 @@ export default {
       // console.log(this.images)
       return this.mid_data;
     },
-    whichShow: function() {
+    whichShow: function () {
       return !this.searching;
     },
-    downloadColumns: function() {
+    downloadColumns: function () {
       var result = [];
       var list = this.list;
       var list_name = this.list_name;
@@ -417,16 +473,14 @@ export default {
       }
       result.push({ label: "序号", prop: "order" });
       return result;
-    }
+    },
   },
   mounted() {
     this.fetchData();
   },
   methods: {
     downloadPicture({ index, row }) {
-      window.open(
-        "/picture/download/" + row.image_path
-      );
+      window.open("http://10.246.174.203:5000/picture/download/" + row.image_path);
     },
     // showCurdDialog({index, row}){
     //   this.$refs.dialogMyself.handleFormData(row)
@@ -444,23 +498,35 @@ export default {
       var para = {};
       para["page"] = this.pagination.page;
       para["pageSize"] = this.pagination.pageSize;
+
       if (this.whichShow) {
+        getDICOMByPage({
+          ...para,
+        })
+          .then((res) => {
+            this.mid_data = res.data;
+            this.pagination.total = res.size;
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.loading = false;
+          });
       } else {
         for (var x in this.searchRequest) {
           para[x] = this.searchRequest[x];
         }
-      }
-      getDICOMByPage({
-        ...para
-      })
-        .then(res => {
-          this.mid_data = res.data;
-          this.pagination.total = res.size;
-          this.loading = false;
+        DICOMSearch({
+          ...para,
         })
-        .catch(err => {
-          this.loading = false;
-        });
+          .then((res) => {
+            this.mid_data = res.data;
+            this.pagination.total = res.size;
+            this.loading = false;
+          })
+          .catch((err) => {
+            this.loading = false;
+          });
+      }
     },
     handleSizeChange(val) {
       this.pagination.pageSize = val;
@@ -501,67 +567,36 @@ export default {
     searchItemInForm() {
       this.searching = false;
       var newRow = {};
-      if (this.inputStr2 === "") {
+      if (this.patient_name_tag && this.patient_name === "") {
         this.$message({
-          message: "您的IP地址输入框输入为空",
-          type: "warning"
+          message: "您的患者姓名输入框输入为空",
+          type: "warning",
         });
         return;
-      } else {
-        // 此处正则表达式主要匹配以下几种情况 如果格式不正确则返回相关的提示信息
-        // 1 ip 127.0.0.1
-        // 2 ip:  127.0.0.1:
-        // 3 ip:port 127.0.0.1:8080
-        let re = new RegExp(
-          "(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}$)|(^((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}:[0-9]{0,5}$)|(^:[0-9]{1,5}$)"
-        );
-        if (!re.test(this.inputStr2)) {
-          this.$notify({
-            title: "IP地址和端口号输入不正确",
-            message:
-              "<strong>主要有以下几种形式:</strong><br><i>ip    127.0.0.1</i><br><i>ip:     127.0.0.1:</i><br><i>ip:port     127.0.0.1:8080</i><br><i>:port     :8080</i>",
-            type: "warining",
-            dangerouslyUseHTMLString: true
-          });
-          return;
-        }
-        if (this.inputStr2.indexOf(":") == -1) {
-          newRow["ip"] = this.inputStr2;
-        } else {
-          if (this.inputStr2.indexOf(":") === this.inputStr2.length - 1) {
-            newRow["ip"] = this.inputStr2.substring(
-              0,
-              this.inputStr2.length - 1
-            );
-          } else if (this.inputStr2.indexOf(":") == 0) {
-            value = Number(this.inputStr2.substring(1).trim());
-            if (!isNaN(value)) {
-              newRow["port"] = value;
-            }
-            this.$message({
-              message: "端口号取整出现问题",
-              type: "warning"
-            });
-            return;
-          } else {
-            this.$message({
-              message: "其他错误",
-              type: "warning"
-            });
-            return;
-          }
-        }
+      } else if (this.patient_name_tag) {
+        newRow["patient_name"] = this.patient_name;
+      }
+      if (this.patient_id_tag && this.patient_id === "") {
+        this.$message({
+          message: "您的患者ID输入框输入为空",
+          type: "warning",
+        });
+        return;
+      } else if (this.patient_id_tag) {
+        newRow["patient_id"] = this.patient_id;
+      }
+      if (Object.getOwnPropertyNames(newRow).length > 0) {
+        this.searching = true;
       }
       this.searchRequest = newRow;
-      this.searching = true;
       this.fetchData();
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
     downloadDataTranslate(data) {
-      return data.map(row => ({
-        ...row
+      return data.map((row) => ({
+        ...row,
       }));
     },
     handleDownloadXlsx(data) {
@@ -569,7 +604,7 @@ export default {
         .excel({
           title: "DICOM部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -580,7 +615,7 @@ export default {
         .csv({
           title: "DICOM部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -588,18 +623,17 @@ export default {
     },
     downloadAllDataTranslate(data) {
       var num = 0;
-      return data.map(row => ({
+      return data.map((row) => ({
         ...row,
-        order: (num += 1),
-        content1: row.content.replace(/\n/g, " ")
+        // order: (num += 1)
       }));
     },
     exportExecl(execl_columns, execl_data) {
       this.$export
         .excel({
-          title: "Astm数据概述",
+          title: "DICOM数据概述",
           columns: execl_columns,
-          data: this.downloadAllDataTranslate(execl_data)
+          data: this.downloadAllDataTranslate(execl_data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -608,9 +642,9 @@ export default {
     exportCvs(cvs_columns, cvs_data) {
       this.$export
         .csv({
-          title: "Astm数据概述",
+          title: "DICOM数据概述",
           columns: cvs_columns,
-          data: this.downloadAllDataTranslate(cvs_data)
+          data: this.downloadAllDataTranslate(cvs_data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -619,7 +653,7 @@ export default {
     handleDownloadAllXlsx() {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -628,48 +662,51 @@ export default {
             var params = {};
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
-            getMonitorDICOM({
-              ...params
+            getDICOMByPage({
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportExecl(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           } else {
             var params = this.searchRequest;
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
-            getMonitorDICOM({
-              ...params
+            for (var x in this.searchRequest) {
+              params[x] = this.searchRequest[x];
+            }
+            DICOMSearch({
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportExecl(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           }
@@ -681,7 +718,7 @@ export default {
     handleDownloadAllCsv(data) {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -689,36 +726,39 @@ export default {
           if (this.whichShow) {
             var params = {
               pageSize: this.pagination.total,
-              page: 1
+              page: 1,
             };
-            getMonitorDICOM({
-              ...params
+            getDICOMByPage({
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportCvs(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           } else {
             var params = this.searchRequest;
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
-            getMonitorDICOM({
-              ...params
+            for (var x in this.searchRequest) {
+              params[x] = this.searchRequest[x];
+            }
+            DICOMSearch({
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 this.loading = false;
                 if (res.status === 200) {
                   this.currentTableData = res.data;
@@ -726,15 +766,15 @@ export default {
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warning"
+                    type: "warning",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.loading = false;
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           }
@@ -742,8 +782,124 @@ export default {
           this.exportCvs(this.downloadColumns, this.currentTableData);
         }
       }, 300);
-    }
-  }
+    },
+    deleteBatch() {
+      var length = this.multipleSelection.length;
+      var count = 0;
+      var success = 0;
+      for (var x in this.multipleSelection) {
+        var req = {};
+        req["id"] = this.multipleSelection[x]["id"];
+        DICOMDelete({
+          ...req,
+        })
+          .then((res) => {
+            count += 1;
+            if (res.status === 200) {
+              success += 1;
+            }
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
+    downloadBatch() {
+      var req = [];
+      for (var x in this.multipleSelection) {
+        req.push(this.multipleSelection[x]["image_path"]);
+      }
+      if (req.length === 0) return;
+      
+      // window.open('http://10.246.174.203:5000/picture/test')
+      
+      // axios({
+      //   url: process.env.VUE_APP_API + '/picture/download/1.jpg',
+      //   method: "get",
+      //   headers:{
+      //     'Access-Control-Allow-Origin':'*'
+      //   },
+      //   responseType:'blob'
+      // }).then(res => {
+      //   // this.downloadFile(res);
+      //   const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
+        
+      //   FileDownload(res.data, fileName);
+      // });
+      axios({
+        url: process.env.VUE_APP_API + "/picture/downDirectory",
+        method: "post",
+        headers:{
+          'Access-Control-Allow-Origin':'*'
+        },
+        data: {
+          pictures: req,
+        },
+        responseType:'blob'
+      }).then(res => {
+        // this.downloadFile(res);
+        const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
+        
+        FileDownload(res.data, fileName);
+      });
+    },
+    downloadFile(response) {
+      // 文件导出
+      // response.data = response.data.replace(/[^\x00-\xff]/g,"01")
+      // console.log(response)
+      // console.log("2", response.data.length, typeof response.data, response.data);
+      // if (!response.data) {
+      //   return;
+      // }
+      const content = response;
+      const blob = new Blob([content], { type: "zip" });
+      console.log(blob);
+      const fileName = "导出信息.xlsx";
+      if ("download" in document.createElement("a")) {
+        // 非IE下载
+        const elink = document.createElement("a");
+        // elink.download = fileName;
+        elink.style.display = "none";
+        elink.href = window.URL.createObjectURL(blob);
+        // elink.setAttribute(
+        //   "download",
+        //   response.headers["content-disposition"].match(/filename=(.*)/)[1]
+        // );
+        [elink.download] = [
+          response.headers["content-disposition"].match(/filename=(.*)/)[1],
+        ];
+        document.body.appendChild(elink);
+        elink.click();
+        document.body.removeChild(elink);
+        window.URL.revokeObjectURL(elink.href); // 释放URL 对象
+      } else {
+        // IE10+下载
+        navigator.msSaveBlob(blob, fileName);
+      }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>

@@ -6,6 +6,7 @@
       </el-input>
     </div>
     <div class="inner">
+      <!-- <div id="allmap" style="width:100%; height:100%;" /> -->
       <ve-bmap
         :settings="chartSettings"
         width="100%"
@@ -82,8 +83,14 @@ export default {
       this.handleSet("ip", value);
     },
   },
+  created:function(){
+    // this.createMap()
+  },
   mounted() {
     this.load();
+    // this.createMap();
+    // var map = new BMapGL.Map('allmap')
+
   },
   methods: {
     ...mapActions("d2admin/db", ["databasePage", "databasePageClear"]),
@@ -108,6 +115,32 @@ export default {
     async handleClear() {
       await this.pageClear({ instance: this, user: true });
     },
+    // createMap(){
+    //   var bmapgl = new BMapGL.Map('allmap')
+    //   var point = new BMapGL.Point(116.403748, 39.915055);
+    //   bmapgl.centerAndZoom(point, 17);
+
+    //   var view = new mapvgl.View({
+    //     map:bmapgl
+    //   })
+
+    //   var layer = new mapvgl.PointLayer({
+    //     color:'rgba(50,50,200,1)',
+    //     blend:'lighter',
+    //     size:2
+    //   })
+      
+    //   view.addLayer(layer)
+
+    //   var data = [{
+    //     geometry:{
+    //       type:'POINT',
+    //       coordinates:[116.403748, 39.915055]
+    //     }
+    //   }]
+
+    //   layer.setData(data)
+    // },
     afterSet(echarts) {
       // console.log(echarts.getModel())
       // console.log(echarts.getModel().getComponent("bmap"))
@@ -153,46 +186,46 @@ export default {
       }
       var ip = {};
       ip["ip"] = this.ip;
-      var geolocation = new window.BMap.Geolocation();
-      geolocation.enableSDKLocation();
-      var map = this.bmap
-      geolocation.getCurrentPosition(function(r){
-        if (this.getStatus() == BMAP_STATUS_SUCCESS){
-          var mk = new window.BMap.Marker(r.point);
-          map.addOverlay(mk);
-          map.panTo(r.point)
-        }
-      })
-      // IPposition({
-      //   ...ip,
+      // var geolocation = new window.BMap.Geolocation();
+      // geolocation.enableSDKLocation();
+      // var map = this.bmap
+      // geolocation.getCurrentPosition(function(r){
+      //   if (this.getStatus() == BMAP_STATUS_SUCCESS){
+      //     var mk = new window.BMap.Marker(r.point);
+      //     map.addOverlay(mk);
+      //     map.panTo(r.point)
+      //   }
       // })
-      //   .then((res) => {
-      //     if (res.status === 200) {
-      //       this.position = res.data;
-      //       this.updatePoint(
-      //         res.data["country"] +
-      //           res.data["prov"] +
-      //           res.data["city"] +
-      //           res.data["company"]
-      //       );
+      IPposition({
+        ...ip,
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            this.position = res.data;
+            this.updatePoint(
+              res.data["country"] +
+                res.data["prov"] +
+                res.data["city"] +
+                res.data["company"]
+            );
 
-      //       this.$message({
-      //         message: "定位成功",
-      //         type: "success",
-      //       });
-      //     } else {
-      //       this.$message({
-      //         message: res.message,
-      //         type: "warning",
-      //       });
-      //     }
-      //   })
-      //   .catch((err) => {
-      //     this.$message({
-      //       message: "网络连接错误",
-      //       type: "error",
-      //     });
-      //   });
+            this.$message({
+              message: "定位成功",
+              type: "success",
+            });
+          } else {
+            this.$message({
+              message: res.message,
+              type: "warning",
+            });
+          }
+        })
+        .catch((err) => {
+          this.$message({
+            message: "网络连接错误",
+            type: "error",
+          });
+        });
       // console.log(this.chartSettings.bmap.center)
     },
     updatePoint(address) {

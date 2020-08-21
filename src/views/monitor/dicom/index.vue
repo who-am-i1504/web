@@ -59,6 +59,7 @@
     <d2-crud
       style="margin: -20px;"
       ref="d2Crud"
+      selection-row
       :expand-row="{title:'详情', align:'center'}"
       :options="options"
       :columns="columns"

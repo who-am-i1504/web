@@ -40,6 +40,12 @@
               <d2-icon name="search" />搜索
             </el-button>
           </el-form-item>
+
+          <el-form-item v-if="info.authority && (info.authority & 2)">
+            <el-button style="width: 100%;" type="danger" @click="deleteBatch">
+              <d2-icon name="warning" />删除
+            </el-button>
+          </el-form-item>
         </el-form>
       </div>
     </template>
@@ -95,6 +101,7 @@
       ref="d2Crud"
       selection-row
       expand-row
+      @selection-change="handleSelectionChange"
       :options="options"
       :columns="columns"
       :data="data"
@@ -166,12 +173,13 @@
 </template>
 
 <script>
-import { AstmCollect, AstmDetail, AstmSearch } from "@api/collect.data";
+import { AstmCollect, AstmDetail, AstmSearch, AstmDelete } from "@api/collect.data";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
+import { mapState } from "vuex";
 Vue.component("SplitPane", SplitPane);
 export default {
   data() {
@@ -333,6 +341,7 @@ export default {
     }
   },
   computed: {
+    ...mapState("d2admin/user", ["info"]),
     data: function() {
       var x;
       var i = 1;
@@ -508,9 +517,20 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
-    downloadDataTranslate(data) {
+    downloadDataTranslateXlsx(data) {
+      var num = 0;
       return data.map(row => ({
-        ...row
+        ...row,
+        order: (num += 1),
+        content1: row.content.replace(/\n/g, "\r")
+      }));
+    },
+    downloadDataTranslateCsv(data) {
+      var num = 0;
+      return data.map(row => ({
+        ...row,
+        order: (num += 1),
+        content1: row.content.replace(/\n/g, "\r")
       }));
     },
     handleDownloadXlsx(data) {
@@ -518,7 +538,7 @@ export default {
         .excel({
           title: "Astm部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslateXlsx(data)
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -529,18 +549,26 @@ export default {
         .csv({
           title: "Astm部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslateCsv(data)
         })
         .then(() => {
           this.$message("导出CSV成功");
         });
     },
-    downloadAllDataTranslate(data) {
+    downloadAllDataTranslateCsv(data) {
       var num = 0;
       return data.map(row => ({
         ...row,
         order: (num += 1),
-        content1: row.content.replace(/\n/g, " ")
+        content1: row.content.replace(/\n/g, "\r")
+      }));
+    },
+    downloadAllDataTranslateXlsx(data) {
+      var num = 0;
+      return data.map(row => ({
+        ...row,
+        order: (num += 1),
+        content1: row.content.replace(/\n/g, "\r")
       }));
     },
     exportExecl(execl_columns, execl_data) {
@@ -548,7 +576,7 @@ export default {
         .excel({
           title: "Astm数据概述",
           columns: execl_columns,
-          data: this.downloadAllDataTranslate(execl_data)
+          data: this.downloadAllDataTranslateXlsx(execl_data)
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -559,7 +587,7 @@ export default {
         .csv({
           title: "Astm数据概述",
           columns: cvs_columns,
-          data: this.downloadAllDataTranslate(cvs_data)
+          data: this.downloadAllDataTranslateCsv(cvs_data)
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -691,7 +719,50 @@ export default {
           this.exportCvs(this.downloadColumns, this.currentTableData);
         }
       }, 300);
-    }
+    },
+    deleteBatch() {
+      var length = this.multipleSelection.length;
+      var count = 0;
+      var success = 0;
+      for (var x in this.multipleSelection) {
+        var req = {};
+        req["id"] = this.multipleSelection[x]["id"];
+        AstmDelete({
+          ...req,
+        })
+          .then((res) => {
+            count += 1;
+            if (res.status === 200) {
+              success += 1;
+            }
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
   }
 };
 </script>

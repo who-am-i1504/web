@@ -18,6 +18,7 @@ import vueJsonTreeView from 'vue-json-tree-view'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 import SplitPane from 'vue-splitpane'
 import Viewer from 'v-viewer'
+// import BaiduMapGL from 'mapvgl' 
 
 Vue.component('SplitPane', SplitPane)
 Vue.component('d2-grid-layout', GridLayout)
@@ -28,6 +29,7 @@ Vue.use(d2Admin)
 Vue.use(pluginExport)
 Vue.use(pluginImport)
 Vue.use(Viewer)
+// Vue.use(BaiduMapGL)
 
 new Vue({
   router,

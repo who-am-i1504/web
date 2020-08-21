@@ -239,17 +239,17 @@ export default {
       if (!response.data) {
         return;
       }
-      let url = window.URL.createObjectURL(new Blob([response.data]));
-      let link = document.createElement("a");
-      link.style.display = "none";
-      link.href = url;
-      link.setAttribute(
-        "download",
-        response.headers["content-disposition"].match(/filename=(.*)/)[1]
-      );
+      // let url = window.URL.createObjectURL(new Blob([response.data]));
+      // let link = document.createElement("a");
+      // link.style.display = "none";
+      // link.href = url;
+      // link.setAttribute(
+      //   "download",
+      //   response.headers["content-disposition"].match(/filename=(.*)/)[1]
+      // );
 
-      document.body.appendChild(link);
-      link.click();
+      // document.body.appendChild(link);
+      // link.click();
     },
     // pageRequest(query) {
     //   var p = new Promise(function (resolve, reject) {
