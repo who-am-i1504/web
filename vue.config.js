@@ -178,7 +178,7 @@ module.exports = {
     const entry = config.entry('app')
     if (process.env.VUE_APP_BUILD_MODE !== 'NOMOCK') {
       entry
-        .add('@/mock')
+        // .add('@/mock')
         .end()
     }
     // 分析工具

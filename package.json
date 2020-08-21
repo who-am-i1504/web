@@ -32,6 +32,7 @@
     "dayjs": "^1.8.17",
     "echarts": "^4.8.0",
     "element-ui": "^2.13.0",
+    "faker": "^4.1.0",
     "flex.css": "^1.1.7",
     "fuse.js": "^3.4.6",
     "github-markdown-css": "^3.0.1",
