@@ -1,5 +1,5 @@
 <template>
-  <d2-container >
+  <d2-container>
     <!-- <SplitPane
       split="horizontal"
     >-->
@@ -85,6 +85,7 @@ import {
 } from "@/api/construct.pcap";
 import request from "@/plugin/axiosfile";
 import { d2CrudPlus } from "d2-crud-plus";
+import { pcapBatchDown, pcapDown } from "@/api/filedownload";
 export default {
   // mixins: [d2CrudPlus.crud],
   components: {
@@ -92,12 +93,12 @@ export default {
   },
   data() {
     return {
-      loading:false,
+      loading: false,
       options: {
         height: "70vh",
         width: "100%",
         rowKey: "id",
-        size:"mini"
+        size: "mini",
       },
       headers: {},
       filename: undefined,
@@ -213,25 +214,31 @@ export default {
   methods: {
     download({ index, row }) {
       if (row.type === "dir") {
-        request({
-          url: "/construct/downDirectory",
-          method: "post",
-          data: {
-            dirname: row.name,
-          },
-        }).then((res) => {
-          this.downloadFile(res);
+        pcapBatchDown({
+          dirname: row.name,
         });
+        // request({
+        //   url: "/construct/downDirectory",
+        //   method: "post",
+        //   data: {
+        //     dirname: row.name,
+        //   },
+        // }).then((res) => {
+        //   this.downloadFile(res);
+        // });
       } else {
-        request({
-          url: "/construct/downfile",
-          method: "post",
-          data: {
-            filename: row.path,
-          },
-        }).then((res) => {
-          this.downloadFile(res);
+        pcapBatchDown({
+          filename: row.path,
         });
+        // request({
+        //   url: "/construct/downfile",
+        //   method: "post",
+        //   data: {
+        //     filename: row.path,
+        //   },
+        // }).then((res) => {
+        //   this.downloadFile(res);
+        // });
       }
     },
     downloadFile(response) {
@@ -277,7 +284,7 @@ export default {
     // },
     start() {
       this.directorys = [];
-      this.loading = true
+      this.loading = true;
       for (var x in this.cons_type) {
         var req = {};
         req["cons_type"] = this.direc[this.cons_type[x]];
@@ -295,7 +302,7 @@ export default {
               type: "warning",
             });
           }
-          this.loading = false
+          this.loading = false;
         });
       }
     },

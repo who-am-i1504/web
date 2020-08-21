@@ -207,9 +207,9 @@ import receiverCell from "./component/receiverCell";
 import ImageTag from "./component/image";
 import ImgViewer from "./component/ImgViewer";
 import { mapState } from "vuex";
-import request from "@/plugin/axiosfile";
-import axios from "axios";
-const FileDownload = require('js-file-download');
+// import axios from "axios";
+// const FileDownload = require('js-file-download');
+import {pictureBatchDown, pictureDown} from '@/api/filedownload'
 // import {d2CrudPlus} from 'd2-crud-plus'
 Vue.component("SplitPane", SplitPane);
 export default {
@@ -450,8 +450,8 @@ export default {
         }
         if (this.mid_data[x]["image_path"] !== undefined) {
           this.images.push({
-            thumbnail: "/picture/show/" + this.mid_data[x]["image_path"],
-            source: "/picture/show/" + this.mid_data[x]["image_path"],
+            thumbnail: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
+            source: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
             title: this.mid_data[x]["order"],
           });
         }
@@ -480,12 +480,22 @@ export default {
   },
   methods: {
     downloadPicture({ index, row }) {
-      window.open("http://10.246.174.203:5000/picture/download/" + row.image_path);
+      // window.open("http://10.246.174.203:5000/picture/download/" + row.image_path);
+      pictureDown(row.image_path)
+      // axios({
+      //   url: process.env.VUE_APP_API + "/picture/download/" + row.image_path,
+      //   method: "get",
+      //   headers:{
+      //     'Access-Control-Allow-Origin':'*'
+      //   },
+      //   responseType:'blob'
+      // }).then(res => {
+      //   // this.downloadFile(res);
+      //   const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
+        
+      //   FileDownload(res.data, fileName);
+      // });
     },
-    // showCurdDialog({index, row}){
-    //   this.$refs.dialogMyself.handleFormData(row)
-    //   this.dialogVisible = true
-    // },
     handleClose(done) {
       done();
     },
@@ -545,25 +555,11 @@ export default {
       this.fetchData();
     },
     doubleClick(row) {
-      // this.$refs.d2Crud.showDialog({
-      //   mode:'edit',
-      //   rowIndex : row.order - (this.pagination.page - 1)*this.pagination.pageSize  - 1
-      // })
-      // this.content = '<strong>' + row.content.replace(/\n/g, '<br><br>') + '</strong>'
-      // this.dialogVisible = true
       this.$refs.viewer.show(
         this.images,
         row.order - (this.pagination.page - 1) * this.pagination.pageSize - 1
-        // Math.floor(Math.random() * 10)
       );
     },
-    // handleDialogCancel(done) {
-    //   done();
-    // },
-    // handleRowEdit({ index, row }, done) {
-    //   this.formOptions.saveLoading = true;
-    //   setTimeout(() => {}, 300);
-    // },
     searchItemInForm() {
       this.searching = false;
       var newRow = {};
@@ -832,14 +828,19 @@ export default {
         req.push(this.multipleSelection[x]["image_path"]);
       }
       if (req.length === 0) return;
-      
-      // window.open('http://10.246.174.203:5000/picture/test')
-      
+      var para = {}
+      para['pictures'] = req
+      pictureBatchDown({
+        ...para
+      })
       // axios({
-      //   url: process.env.VUE_APP_API + '/picture/download/1.jpg',
-      //   method: "get",
+      //   url: process.env.VUE_APP_API + "/picture/downDirectory",
+      //   method: "post",
       //   headers:{
       //     'Access-Control-Allow-Origin':'*'
+      //   },
+      //   data: {
+      //     pictures: req,
       //   },
       //   responseType:'blob'
       // }).then(res => {
@@ -848,57 +849,7 @@ export default {
         
       //   FileDownload(res.data, fileName);
       // });
-      axios({
-        url: process.env.VUE_APP_API + "/picture/downDirectory",
-        method: "post",
-        headers:{
-          'Access-Control-Allow-Origin':'*'
-        },
-        data: {
-          pictures: req,
-        },
-        responseType:'blob'
-      }).then(res => {
-        // this.downloadFile(res);
-        const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
-        
-        FileDownload(res.data, fileName);
-      });
-    },
-    downloadFile(response) {
-      // 文件导出
-      // response.data = response.data.replace(/[^\x00-\xff]/g,"01")
-      // console.log(response)
-      // console.log("2", response.data.length, typeof response.data, response.data);
-      // if (!response.data) {
-      //   return;
-      // }
-      const content = response;
-      const blob = new Blob([content], { type: "zip" });
-      console.log(blob);
-      const fileName = "导出信息.xlsx";
-      if ("download" in document.createElement("a")) {
-        // 非IE下载
-        const elink = document.createElement("a");
-        // elink.download = fileName;
-        elink.style.display = "none";
-        elink.href = window.URL.createObjectURL(blob);
-        // elink.setAttribute(
-        //   "download",
-        //   response.headers["content-disposition"].match(/filename=(.*)/)[1]
-        // );
-        [elink.download] = [
-          response.headers["content-disposition"].match(/filename=(.*)/)[1],
-        ];
-        document.body.appendChild(elink);
-        elink.click();
-        document.body.removeChild(elink);
-        window.URL.revokeObjectURL(elink.href); // 释放URL 对象
-      } else {
-        // IE10+下载
-        navigator.msSaveBlob(blob, fileName);
-      }
-    },
+    }
   },
 };
 </script>

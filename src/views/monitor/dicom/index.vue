@@ -200,6 +200,7 @@ import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
 import ImageTag from "./component/image";
 import ImgViewer from "./component/ImgViewer";
+import {pictureBatchDown, pictureDown} from '@/api/filedownload'
 // import {d2CrudPlus} from 'd2-crud-plus'
 Vue.component("SplitPane", SplitPane);
 export default {
@@ -449,8 +450,8 @@ export default {
         }
         if (this.mid_data[x]["image_path"] !== undefined) {
           this.images.push({
-            thumbnail: "/picture/show/" + this.mid_data[x]["image_path"],
-            source: "/picture/show/" + this.mid_data[x]["image_path"],
+            thumbnail: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
+            source: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
             title: this.mid_data[x]["order"],
           });
         }
@@ -641,9 +642,20 @@ export default {
       });
     },
     downloadPicture({ index, row }) {
-      window.open(
-        "http://10.246.174.203:5000/picture/download/" + row.image_path
-      );
+      pictureDown(row.image_path)
+      // axios({
+      //   url: process.env.VUE_APP_API + "/picture/download/" + row.image_path,
+      //   method: "get",
+      //   headers:{
+      //     'Access-Control-Allow-Origin':'*'
+      //   },
+      //   responseType:'blob'
+      // }).then(res => {
+      //   // this.downloadFile(res);
+      //   const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
+        
+      //   FileDownload(res.data, fileName);
+      // });
     },
     // showCurdDialog({index, row}){
     //   this.$refs.dialogMyself.handleFormData(row)
@@ -960,6 +972,18 @@ export default {
         }
       }, 300);
     },
+    downloadBatch() {
+      var req = [];
+      for (var x in this.multipleSelection) {
+        req.push(this.multipleSelection[x]["image_path"]);
+      }
+      if (req.length === 0) return;
+      var para = {}
+      para['pictures'] = req
+      pictureBatchDown({
+        ...para
+      })
+    }
   },
 };
 </script>

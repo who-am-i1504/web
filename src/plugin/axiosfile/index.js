@@ -1,11 +1,10 @@
-import store from '@/store'
 import axios from 'axios'
-import { Message } from 'element-ui'
 import util from '@/libs/util'
+const FileDownload = require('js-file-download');
 
 // 创建一个 axios 实例
 const service = axios.create({
-  baseURL: '',//process.env.VUE_APP_API,
+  baseURL: process.env.VUE_APP_API,
   timeout: 5000 // 请求超时时间
 })
 
@@ -17,7 +16,7 @@ service.interceptors.request.use(
     // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
     config.headers['X-Token'] = token
     config['responseType'] = 'blob'
-    // config.headers['Access-Control-Allow-Origin'] = '*'
+    config.headers['Access-Control-Allow-Origin'] = '*'
     // config.headers['Content-Type']
     return config
   },
@@ -31,7 +30,9 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   response => {
     // dataAxios 是 axios 返回数据中的 data
-    return response
+      const fileName = response.headers["content-disposition"].match(/filename=(.*)/)[1]
+      
+      return FileDownload(response.data, fileName);
   },
   error => {
     return Promise.reject(error)

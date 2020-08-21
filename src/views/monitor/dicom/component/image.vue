@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     path() {
-      return "/picture/show/" + this.value;
+      return process.env.VUE_APP_API + "/picture/show/" + this.value;
     }
   },
   methods: {
