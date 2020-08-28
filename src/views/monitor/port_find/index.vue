@@ -22,8 +22,6 @@
         <el-input slot="paneL" placeholder="端口" v-model="port"></el-input>
         <el-button @click="detail_find" slot="paneR" icon="el-icon-search">端口详细发现</el-button>
       </SplitPane>
-      <!-- <br /> -->
-      <!-- <br /> -->
     </div>
     <el-switch v-model="table" active-text="表格" inactive-text="Json 树" />
     <div class="loading-area"/>
@@ -268,7 +266,6 @@ export default {
             var column = JSON.parse(
               JSON.stringify(this.portStatus[ip][protocol][port])
             );
-              // console.log(typeof column['services'])
             for (var x in column) {
               if (column[x] === "" || (typeof column[x] === Array && column[x].length == 0) || (typeof column[x] === Object && Object.getOwnPropertyNames(column[x]).length === 0)) {
                 column[x] = "无";
@@ -354,11 +351,9 @@ export default {
     showOrNot: function(val, oldVal) {}
   },
   mounted() {
-    // this.port_find()
   },
   methods: {
     onChangeData: function(data) {
-      // console.log(JSON.stringify(data));
     },
     valid() {
       if (this.ip === "") {

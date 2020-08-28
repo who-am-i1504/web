@@ -1,31 +1,31 @@
 <script>
 export default {
-  name: 'render-component',
+  name: "render-component",
   props: {
     /**
      * @description 传入的render函数
      */
     renderFunction: {
       type: Function,
-      required: true
+      required: true,
     },
     /**
      * @description 传入的scope
      */
     scope: {
-      default: null
+      default: null,
     },
   },
-  render (h) {
-    return this.handleRender(h, this.scope)
+  render(h) {
+    return this.handleRender(h, this.scope);
   },
   methods: {
-    handleRender (h, scope) {
-      if (typeof scope === 'string') {
-        return this.renderFunction(h, scope)
+    handleRender(h, scope) {
+      if (typeof scope === "string") {
+        return this.renderFunction(h, scope);
       }
-      return this.renderFunction(h, scope.row, scope.column, scope.$index)
-    }
-  }
-}
+      return this.renderFunction(h, scope.row, scope.column, scope.$index);
+    },
+  },
+};
 </script>

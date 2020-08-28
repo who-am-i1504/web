@@ -51,95 +51,90 @@ export default {
       form: {
         sPsd: "",
         nPsd: "",
-        conPsd: ""
+        conPsd: "",
       },
       rules: {
         sPsd: [
           {
             required: true,
             message: "请输入原密码",
-            trigger: "blur"
+            trigger: "blur",
           },
           {
             min: 5,
             max: 20,
-            message: "密码长度应该在5到20位之间"
-          }
+            message: "密码长度应该在5到20位之间",
+          },
         ],
         nPsd: [
           {
             required: true,
             message: "请输入密码",
-            trigger: "blur"
+            trigger: "blur",
           },
           {
             min: 5,
             max: 20,
-            message: "密码长度应该在5到20位之间"
-          }
+            message: "密码长度应该在5到20位之间",
+          },
         ],
         conPsd: [
           {
             required: true,
             message: "请输入密码",
-            trigger: "blur"
+            trigger: "blur",
           },
           {
             min: 5,
             max: 20,
-            message: "密码长度应该在5到20位之间"
-          }
-        ]
-      }
+            message: "密码长度应该在5到20位之间",
+          },
+        ],
+      },
     };
   },
   computed: {},
   mounted() {},
   methods: {
     ...mapActions("d2admin/account", ["logout"]),
-    fetchData() {
-      // getMonitorRule({
-      // }).then(res => {
-      // }).catch(err => {
-      // })
-    },
+    fetchData() {},
     changePsd() {
-      console.log(this.form.nPsd)
+      // console.log(this.form.nPsd)
       if (this.form.nPsd === this.form.conPsd) {
         if (this.form.nPsd === this.form.sPsd) {
           this.$message({
             message: "您输入的确认密码和新密码不一致，请重新输入",
-            type: "error"
+            type: "error",
           });
           return;
         }
         var sPsd = bcrypt.hashSync(sha512(this.form.sPsd), salt);
         var nPas = bcrypt.hashSync(sha512(this.form.nPsd), salt);
         var req = {};
-        req.oldPsd = sPsd.substring(sPsd.lastIndexOf("$")+ 1);
-        req.newPsd = nPas.substring(nPas.lastIndexOf("$")+ 1);
+        req.oldPsd = sPsd.substring(sPsd.lastIndexOf("$") + 1);
+        req.newPsd = nPas.substring(nPas.lastIndexOf("$") + 1);
         ChangePwd({
-          ...req
+          ...req,
         })
-          .then(res => {
+          .then((res) => {
             if (res.status == 200) {
               this.$message({
                 message: "请重新登录",
-                type: "success"
+                type: "success",
               });
               this.logout();
             }
           })
-          .catch(err => {});
+          .catch((err) => {});
       } else {
         this.$message({
           message: "您输入的确认密码和新密码不一致，请重新输入",
-          type: "error"
+          type: "error",
         });
         return;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

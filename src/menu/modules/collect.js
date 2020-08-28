@@ -35,7 +35,7 @@ export default {
     {
       path: `${pre}construct`,
       title: 'Pcap文件重组',
-      iconSvg: 'ASTM',
+      iconSvg: 'pcap',
     }
     
   ])('/collect/')

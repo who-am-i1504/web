@@ -1,10 +1,8 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header" style="background-color: rgba(#000, .7);">
       <div class="panel-search">
-        <!-- style="margin: -16px; background-color:rgba(#000, .7);" -->
         <el-form :inline="true" ref="form">
-          <!-- style="background-color: rgba(#000, .7);margin-bottom: -30px; width: 100%; align-items: center;" -->
           <el-form-item style="background-color: rgba(#000, .7);">
             <el-input
               style="background-color: rgba(#000, .7);"
@@ -123,7 +121,7 @@
       height="60%"
       :before-close="handleClose"
     >
-      <el-container style="height:300px;" >
+      <el-container style="height:300px;">
         <el-main>
           <el-table v-bind="table">
             <el-table-column
@@ -136,7 +134,6 @@
         </el-main>
       </el-container>
       <span slot="footer" class="dialog-footer">
-        <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
         <el-button type="primary" @click="batchSubmit">确 定</el-button>
       </span>
     </el-dialog>
@@ -149,7 +146,7 @@ import {
   searchMonitorRule,
   addMonitorRule,
   updateMonitorRule,
-  deleteMonitorRule
+  deleteMonitorRule,
 } from "@api/monitor";
 import Vue from "vue";
 import { mapActions } from "vuex";
@@ -168,37 +165,36 @@ export default {
         mid_data: [],
         index: 0,
         timer: null,
-        batchStatus: ""
+        batchStatus: "",
       },
       multipleSelection: [],
       currentTableData: [],
       downloadColumns: [
         { label: "序号", prop: "order" },
         { label: "ID", prop: "id" },
-        { label: "IP地址黑名单", prop: "ip" }
+        { label: "IP地址黑名单", prop: "ip" },
       ],
       inputStr: "",
       containerType: "full",
       scrollDelay: 10,
       radio: 1,
       addIcon: "el-icon-circle-plus",
-      // menu,
       banner: {
         title: "HL7规则管理",
-        subTitle: "在这里可以进行HL7规则的添加,删除,更改等功能"
+        subTitle: "在这里可以进行HL7规则的添加,删除,更改等功能",
       },
       columns: [
         {
           title: "序号",
           key: "order",
           align: "center",
-          width: 100
+          width: 100,
         },
         {
           title: "黑名单IP地址",
           key: "ip",
-          align: "center"
-        }
+          align: "center",
+        },
       ],
       mid_data: [],
       loading: false,
@@ -207,12 +203,12 @@ export default {
         pageSize: 20,
         total: 0,
         pageCount: 9,
-        layout: "prev, pager, next, jumper, ->, total, slot"
+        layout: "prev, pager, next, jumper, ->, total, slot",
       },
       editTemplate: {
         ip: {
           title: "字符串",
-          value: ""
+          value: "",
         },
         radio: {
           title: "修改选项：",
@@ -221,28 +217,28 @@ export default {
             options: [
               {
                 label: "修改",
-                value: 1
+                value: 1,
               },
               {
                 label: "删除",
-                value: 2
-              }
-            ]
-          }
-        }
+                value: 2,
+              },
+            ],
+          },
+        },
       },
       formOptions: {
         saveButtonIcon: "el-icon-edit",
         saveButtonText: "修改",
         saveLoading: false,
         "append-to-body": true,
-        "lock-scroll": true
+        "lock-scroll": true,
       },
-      tagGet: true
+      tagGet: true,
     };
   },
   computed: {
-    data: function() {
+    data: function () {
       var x;
       var i = 1;
       for (x in this.mid_data) {
@@ -252,25 +248,29 @@ export default {
         i += 1;
       }
       return this.mid_data;
-    }
+    },
   },
   watch: {
-    inputStr: function(value) {
+    inputStr: function (value) {
       this.handleSet("inputStr", value);
     },
-    pagination: function(value) {
+    pagination: function (value) {
       this.handleSet("pagination", value);
-    }
+    },
   },
   mounted() {
     this.load();
     this.fetchData();
   },
   methods: {
-    ...mapActions("d2admin/db", ["databasePage", "databasePageClear", "pageClear"]),
+    ...mapActions("d2admin/db", [
+      "databasePage",
+      "databasePageClear",
+      "pageClear",
+    ]),
     async load() {
       const db = await this.databasePage({
-        user: true
+        user: true,
       });
       var str = db.value();
       if (str.inputStr) {
@@ -285,7 +285,7 @@ export default {
         return;
       }
       const db = await this.databasePage({
-        user: true
+        user: true,
       });
       db.set(name, value).write();
     },
@@ -300,15 +300,15 @@ export default {
       var mid_data = this.table.mid_data;
       var notify = this.$notify;
       var t = this.table;
-      var f = function() {
+      var f = function () {
         for (var x = index; x < index + 1000 && x < mid_data.length; x++) {
           var row = {};
           t.batchStatus = "已经提交" + String(x) + "条数据。";
           row["IP地址黑名单"] = mid_data[x]["IP地址黑名单"];
           addMonitorRule({
-            ...row
+            ...row,
           })
-            .then(res => {
+            .then((res) => {
               sum++;
               if (res.status === 200) {
                 success++;
@@ -320,11 +320,11 @@ export default {
                 notify({
                   title: "批量添加信息",
                   message: "失败:" + String(faild) + "成功:" + String(success),
-                  type: "success"
+                  type: "success",
                 });
               }
             })
-            .catch(err => {
+            .catch((err) => {
               sum++;
               faild++;
               if (sum === mid_data.length) {
@@ -332,13 +332,12 @@ export default {
                 notify({
                   title: "批量添加信息",
                   message: "失败:" + String(faild) + "成功:" + String(success),
-                  type: "success"
+                  type: "success",
                 });
               }
             });
         }
         index = x;
-        // console.log(x)
         if (x === mid_data.length) {
           t.batchStatus = "全部提交完成";
           clearInterval(timer);
@@ -356,28 +355,25 @@ export default {
         this.table.data.push(this.table.mid_data[x]);
       }
       this.table.index = x;
-      // console.log(x)
       if (x == this.table.mid_data.length || !this.dialogVisible) {
         clearInterval(this.table.timer);
       }
     },
     handleClose(done) {
-      // this.batchSubmit()
-      // console.log(this.table)
       done();
     },
     handleUploadCsv(file) {
       if (!(file.type === "application/vnd.ms-excel")) {
         this.$message({
           message: "只能导入csv文件",
-          type: "error"
+          type: "error",
         });
         return false;
       }
-      this.$import.csv(file).then(res => {
-        this.table.columns = Object.keys(res.data[0]).map(e => ({
+      this.$import.csv(file).then((res) => {
+        this.table.columns = Object.keys(res.data[0]).map((e) => ({
           label: e,
-          prop: e
+          prop: e,
         }));
         this.table.index = 0;
         this.table.data = [];
@@ -396,23 +392,21 @@ export default {
       ) {
         this.$message({
           message: "只能导入csv文件",
-          type: "error"
+          type: "error",
         });
         return false;
       }
       this.$import.xlsx(file).then(({ header, results }) => {
-        this.table.columns = header.map(e => {
+        this.table.columns = header.map((e) => {
           return {
             label: e,
-            prop: e
+            prop: e,
           };
         });
         this.table.index = 0;
         this.table.data = [];
         this.table.mid_data = results;
         this.table.timer = setInterval(this.dealDialogTable, 100);
-        // console.log(results)
-        // this.table.data = results
         this.dialogVisible = true;
       });
       return false;
@@ -428,24 +422,24 @@ export default {
     fetchData() {
       this.loading = true;
       getMonitorRule({
-        ...this.pagination
+        ...this.pagination,
       })
-        .then(res => {
+        .then((res) => {
           if (res.status === 200) {
             this.mid_data = res.data;
             this.pagination.total = res.size;
           } else {
             this.$message({
               message: res.message,
-              type: "warning"
+              type: "warning",
             });
           }
           this.loading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message({
             message: "网络错误",
-            type: "error"
+            type: "error",
           });
           this.loading = false;
         });
@@ -486,7 +480,7 @@ export default {
       this.$refs.d2Crud.showDialog({
         mode: "edit",
         rowIndex:
-          row.order - (this.pagination.page - 1) * this.pagination.pageSize - 1
+          row.order - (this.pagination.page - 1) * this.pagination.pageSize - 1,
       });
     },
     handleDialogCancel(done) {
@@ -496,8 +490,8 @@ export default {
       this.multipleSelection = val;
     },
     downloadDataTranslate(data) {
-      return data.map(row => ({
-        ...row
+      return data.map((row) => ({
+        ...row,
       }));
     },
     handleDownloadXlsx(data) {
@@ -505,7 +499,7 @@ export default {
         .excel({
           title: "HL7部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -516,7 +510,7 @@ export default {
         .csv({
           title: "HL7部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -525,16 +519,14 @@ export default {
     handleRowEdit({ index, row }, done) {
       this.formOptions.saveLoading = true;
       setTimeout(() => {
-        // console.log(index)
-        // console.log(row)
         var newRow = {};
         newRow["id"] = row.id;
         newRow["ip"] = row.ip;
         if (row.radio === 2) {
           deleteMonitorRule({
-            ...newRow
+            ...newRow,
           })
-            .then(res => {
+            .then((res) => {
               if (res.status === 200) {
                 if (this.tagGet) {
                   this.fetchData();
@@ -543,7 +535,7 @@ export default {
                 }
                 this.$message({
                   message: "删除成功",
-                  type: "success"
+                  type: "success",
                 });
               } else {
                 if (this.tagGet) {
@@ -553,24 +545,24 @@ export default {
                 }
                 this.$message({
                   message: res.message,
-                  type: "warning"
+                  type: "warning",
                 });
               }
               done();
               this.formOptions.saveLoading = false;
             })
-            .catch(err => {
+            .catch((err) => {
               this.$message({
                 message: "网络错误",
-                type: "warning"
+                type: "warning",
               });
               this.formOptions.saveLoading = false;
             });
         } else if (row.radio == 1) {
           deleteMonitorRule({
-            ...newRow
+            ...newRow,
           })
-            .then(res => {
+            .then((res) => {
               if (res.status === 200) {
                 if (this.tagGet) {
                   this.fetchData();
@@ -579,7 +571,7 @@ export default {
                 }
                 this.$message({
                   message: "更改成功",
-                  type: "success"
+                  type: "success",
                 });
               } else {
                 if (this.tagGet) {
@@ -589,17 +581,16 @@ export default {
                 }
                 this.$message({
                   message: res.message,
-                  type: "warning"
+                  type: "warning",
                 });
               }
               done();
               this.formOptions.saveLoading = false;
             })
-            .catch(err => {
-              // console.log('err', err)
+            .catch((err) => {
               this.$message({
                 message: "网络错误",
-                type: "warning"
+                type: "warning",
               });
               this.formOptions.saveLoading = false;
               done();
@@ -615,7 +606,7 @@ export default {
       if (!re.test(this.inputStr)) {
         this.$message({
           message: "输入的IP地址格式不正确",
-          type: "warning"
+          type: "warning",
         });
         return -1;
       }
@@ -626,35 +617,35 @@ export default {
       var newRow = {};
       newRow["ip"] = this.inputStr;
       addMonitorRule({
-        ...newRow
+        ...newRow,
       })
-        .then(res => {
+        .then((res) => {
           if (res["status"] === 200) {
             this.$notify({
               title: "IP地址添加成功",
               message: res["data"],
-              type: "success"
+              type: "success",
             });
           } else {
             this.$notify({
               title: "HL7添加出现问题",
               message: res["message"],
-              type: "warning"
+              type: "warning",
             });
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.$notify.error({
             title: "错误",
-            message: "网络连接发生错误"
+            message: "网络连接发生错误",
           });
         });
     },
     downloadAllDataTranslate(data) {
       var num = 0;
-      return data.map(row => ({
+      return data.map((row) => ({
         ...row,
-        order: (num += 1)
+        order: (num += 1),
       }));
     },
     exportExecl(execl_columns, execl_data) {
@@ -662,7 +653,7 @@ export default {
         .excel({
           title: "IP地址黑名单",
           columns: execl_columns,
-          data: this.downloadAllDataTranslate(execl_data)
+          data: this.downloadAllDataTranslate(execl_data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -673,7 +664,7 @@ export default {
         .csv({
           title: "IP地址黑名单",
           columns: cvs_columns,
-          data: this.downloadAllDataTranslate(cvs_data)
+          data: this.downloadAllDataTranslate(cvs_data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -682,7 +673,7 @@ export default {
     handleDownloadAllXlsx() {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -692,21 +683,21 @@ export default {
           now["page"] = 1;
           this.loading = true;
           getMonitorRule({
-            ...now
+            ...now,
           })
-            .then(res => {
+            .then((res) => {
               if (res.status === 200) {
                 this.currentTableData = res.data;
                 this.exportExecl(this.downloadColumns, res.data);
               } else {
                 this.$message({
                   message: res.message,
-                  type: "warning"
+                  type: "warning",
                 });
               }
               this.loading = false;
             })
-            .catch(err => {
+            .catch((err) => {
               this.loading = false;
             });
         } else {
@@ -717,7 +708,7 @@ export default {
     handleDownloadAllCsv(data) {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -727,21 +718,21 @@ export default {
           now["page"] = 1;
           this.loading = true;
           getMonitorRule({
-            ...now
+            ...now,
           })
-            .then(res => {
+            .then((res) => {
               if (res.status === 200) {
                 this.currentTableData = res.data;
                 this.exportCvs(this.downloadColumns, res.data);
               } else {
                 this.$message({
                   message: res.message,
-                  type: "warning"
+                  type: "warning",
                 });
               }
               this.loading = false;
             })
-            .catch(err => {
+            .catch((err) => {
               this.loading = false;
             });
         } else {
@@ -762,24 +753,24 @@ export default {
       newRow["page"] = this.pagination.page;
       newRow["pageSize"] = this.pagination.pageSize;
       searchMonitorRule({
-        ...newRow
+        ...newRow,
       })
-        .then(res => {
+        .then((res) => {
           if (res.status === 200) {
             this.mid_data = res.data;
             this.pagination.total = res.size;
           } else {
             this.$message({
               message: res.message,
-              type: "warning"
+              type: "warning",
             });
           }
           this.loading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           this.$message({
             message: "网络错误",
-            type: "error"
+            type: "error",
           });
           this.loading = false;
         });
@@ -794,22 +785,20 @@ export default {
       var success = 0;
       var error = 0;
       setTimeout(() => {
-        // console.log(index)
-        // console.log(row)
         for (var i = 0; i < length; i++) {
           var newRow = {};
           newRow["id"] = this.multipleSelection[i].id;
           newRow["ip"] = this.multipleSelection[i].ip;
 
           deleteMonitorRule({
-            ...newRow
+            ...newRow,
           })
-            .then(res => {
+            .then((res) => {
               count++;
-              if (res.status == 200){
-                success ++;
-              }else{
-                error ++;
+              if (res.status == 200) {
+                success++;
+              } else {
+                error++;
               }
               if (count == length) {
                 if (this.tagGet) {
@@ -818,14 +807,19 @@ export default {
                   this.searchItemInForm();
                 }
                 this.$message({
-                  message: "删除成功" + String(success) + "条; 删除失败" + String(error) + "条。",
-                  type: "success"
+                  message:
+                    "删除成功" +
+                    String(success) +
+                    "条; 删除失败" +
+                    String(error) +
+                    "条。",
+                  type: "success",
                 });
               }
             })
-            .catch(err => {
-              count ++;
-              error ++;
+            .catch((err) => {
+              count++;
+              error++;
               if (count == length) {
                 if (this.tagGet) {
                   this.fetchData();
@@ -833,15 +827,20 @@ export default {
                   this.searchItemInForm();
                 }
                 this.$message({
-                  message: "删除成功" + String(success) + "条; 删除失败" + String(error) + "条。",
-                  type: "success"
+                  message:
+                    "删除成功" +
+                    String(success) +
+                    "条; 删除失败" +
+                    String(error) +
+                    "条。",
+                  type: "success",
                 });
               }
             });
         }
       }, 300);
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>

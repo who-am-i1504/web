@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
       <div style="margin: -16px;" class="panel-search">
         <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">
@@ -55,6 +55,11 @@
           </el-button>
         </el-popover>
       </el-form-item>
+      <el-form-item v-if="info.authority && (info.authority & 2)">
+        <el-button style="width: 100%;" type="danger" @click="deleteBatch">
+          <d2-icon name="warning" />删除
+        </el-button>
+      </el-form-item>
     </el-form>
     <d2-crud
       style="margin: -20px;"
@@ -87,11 +92,8 @@
       </template>
       <template slot="expandSlot" slot-scope="scope">
         <el-input type="textarea" placeholder="内容" :rows="5" v-model="scope.row.content"></el-input>
-        <!-- <div> -->
-        <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
         <el-form slot="paneL" ref="form" :model="scope.row" :fullscreen="true">
           <el-row>
-            <!-- <el-col :span="4"> -->
             <template v-for="(key, index) in list">
               <el-col :span="12">
                 <el-form-item :label="list_name[index]">
@@ -99,16 +101,11 @@
                 </el-form-item>
               </el-col>
             </template>
-            <!-- </el-col> -->
             <el-col :span="4">
               <image slot="paneR" :value="scope.row['image_path']" />
             </el-col>
           </el-row>
-          <!-- <slot name="FormBodyAppendSlot" :form="scope.row" /> -->
         </el-form>
-
-        <!-- </SplitPane> -->
-        <!-- </div> -->
       </template>
     </d2-crud>
     <el-card style="margin: -10px;" slot="footer">
@@ -134,9 +131,16 @@
         :class="{'d2-crud-dialog':true}"
       >
         <template slot="title">
-        关系网络图
-        <slot name="FormHeaderSlot" />
-        <button v-if="dialogOptions.fullscreen!=null" type="button"  class="el-dialog__headerbtn fullscreen" @click="dialogOptions.fullscreen = !dialogOptions.fullscreen" ><i class="el-dialog__close el-icon el-icon-full-screen"></i></button>
+          关系网络图
+          <slot name="FormHeaderSlot" />
+          <button
+            v-if="dialogOptions.fullscreen!=null"
+            type="button"
+            class="el-dialog__headerbtn fullscreen"
+            @click="dialogOptions.fullscreen = !dialogOptions.fullscreen"
+          >
+            <i class="el-dialog__close el-icon el-icon-full-screen"></i>
+          </button>
         </template>
 
         <div ref="chart" style="width:100%;height:70vh;"></div>
@@ -149,10 +153,10 @@
 </template>
 
 <script>
-// import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
-import { getMonitorHL7, HL7Graph } from "@api/monitor";
+import { HL7Delete } from "@/api/collect.data";
+import { getMonitorHL7, HL7Graph } from "@/api/monitor";
 import Vue from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
@@ -160,8 +164,8 @@ Vue.component("SplitPane", SplitPane);
 export default {
   data() {
     return {
-      dialogOptions:{
-        fullscreen:false
+      dialogOptions: {
+        fullscreen: false,
       },
       content: "",
       dialogVisible: false,
@@ -191,10 +195,6 @@ export default {
           key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
-          // showOverflowTooltip:true,
-          // component:{
-          //   name:sendCell
-          // },
           rowSlot: true,
         },
         {
@@ -202,30 +202,8 @@ export default {
           key: "receiver_tag",
           showOverflowTooltip: true,
           align: "center",
-          // showOverflowTooltip:true,
-          // component:{
-          //   name:receiverCell
-          // }
           rowSlot: true,
         },
-        // {
-        //   title:'序列号',
-        //   key:'seqnumber',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
-        // {
-        //   title:'发送时间',
-        //   key:'time',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
-        // {
-        //   title:'版本号',
-        //   key:'version',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
         {
           title: "数据大小",
           key: "size",
@@ -305,6 +283,7 @@ export default {
     },
   },
   computed: {
+    ...mapState("d2admin/user", ["info"]),
     data: function () {
       var x;
       var i = 1;
@@ -322,17 +301,17 @@ export default {
       const webkitDep = this.webkitDep;
       return {
         title: {
-            text: 'HL7局部网络结构',
-            subtext: 'Default layout',
-            top: 'bottom',
-            left: 'right'
+          text: "HL7局部网络结构",
+          subtext: "Default layout",
+          top: "bottom",
+          left: "right",
         },
         legend: {
           data: webkitDep.categories,
         },
         series: [
           {
-            roam:true,
+            roam: true,
             type: "graph",
             layout: "force",
             animation: false,
@@ -342,9 +321,8 @@ export default {
             },
             draggable: true,
             focusNodeAdjacency: true,
-            edgeSymbol: ['', 'arrow'],
+            edgeSymbol: ["", "arrow"],
             data: webkitDep.nodes.map(function (node, idx) {
-              // console.log(node)
               return {
                 symbolSize: node.size,
                 id: idx,
@@ -352,13 +330,11 @@ export default {
                 value: node.value,
                 category: node.category,
               };
-              
             }),
             categories: webkitDep.categories,
             force: {
               edgeLength: 100,
               repulsion: 200,
-              // gravity: 0.2,
             },
             edges: webkitDep.links,
           },
@@ -368,8 +344,6 @@ export default {
   },
   mounted() {
     this.fetchData();
-    // this.initHL7Grapth();
-    // this.getHL7Grapth();
   },
   methods: {
     showGraph(ip_port, tag) {
@@ -381,7 +355,7 @@ export default {
       this.webkitDep.links = [];
       this.nodes = {};
       var x = this.webkitDep.nodes.push({
-        fixed:true,
+        fixed: true,
         name: ip,
         value: 1,
         category: tag ? 1 : 0,
@@ -408,8 +382,8 @@ export default {
                   size: this.nodeSize[depth],
                 });
                 this.nodes[src] = index - 1;
-                if (depth == 2){
-                  this.count += 1
+                if (depth == 2) {
+                  this.count += 1;
                 }
                 this.getHL7IP(src, depth + 1);
               }
@@ -421,26 +395,23 @@ export default {
                   size: this.nodeSize[depth],
                 });
                 this.nodes[dst] = index - 1;
-                if (depth == 2){
-                  this.count += 1
+                if (depth == 2) {
+                  this.count += 1;
                 }
                 this.getHL7IP(dst, depth + 1);
               }
-              // console.log(this.webkitDep,src, dst)
               this.webkitDep.links.push({
                 source: this.nodes[src],
                 target: this.nodes[dst],
               });
             }
             if (depth === 2) {
-              // this.count = res.data.length;
             } else if (depth === 3) {
               this.midCount += 1;
               if (this.midCount === this.count) {
                 this.getHL7Grapth();
               }
             }
-            // console.log(200,this.count, this.midCount)
           } else {
             if (depth === 3) {
               this.midCount += 1;
@@ -448,7 +419,6 @@ export default {
                 this.getHL7Grapth();
               }
             }
-            //  console.log( 'others',this.count, this.midCount)
           }
         })
         .catch((err) => {
@@ -458,22 +428,16 @@ export default {
               this.getHL7Grapth();
             }
           }
-          //  console.log('error',this.count, this.midCount)
         });
     },
     getHL7Grapth() {
-      // console.log('here')
-      // console.log(this.myChart)
       if (this.myChart === "") {
-        // this.initHL7Grapth()
       } else {
         this.myChart.dispose();
       }
       this.initHL7Grapth();
-      // this.myChart.setOption(this.options_graph)
     },
     initHL7Grapth() {
-      // console.log('init')
       const chart = this.$refs.chart;
       if (chart) {
         const myChart = this.$echarts.init(chart);
@@ -482,7 +446,6 @@ export default {
           myChart.resize();
         });
         this.myChart = myChart;
-        // console.log(this.myChart)
       }
       this.$on("hook:destroyed", () => {
         window.removeEventListener("resize", function () {
@@ -537,10 +500,6 @@ export default {
       this.fetchData();
     },
     doubleClick(row, event) {
-      // this.$refs.d2Crud.showDialog({
-      //   mode:'edit',
-      //   rowIndex : row.order - (this.pagination.page - 1)*this.pagination.pageSize  - 1
-      // })
       this.content =
         "<strong>" + row.content.replace(/\n/g, "<br><br>") + "</strong>";
       this.dialogVisible = true;
@@ -797,6 +756,49 @@ export default {
         }
       }, 300);
     },
+    deleteBatch() {
+      var length = this.multipleSelection.length;
+      var count = 0;
+      var success = 0;
+      for (var x in this.multipleSelection) {
+        var req = {};
+        req["id"] = this.multipleSelection[x]["id"];
+        HL7Delete({
+          ...req,
+        })
+          .then((res) => {
+            count += 1;
+            if (res.status === 200) {
+              success += 1;
+            }
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
   },
 };
 </script>
@@ -816,19 +818,19 @@ export default {
   @extend %unable-select;
   align-items: center;
 }
-.d2-crud-dialog{
-  .el-dialog__headerbtn{
-    padding:10px;
-    top:12px;
+.d2-crud-dialog {
+  .el-dialog__headerbtn {
+    padding: 10px;
+    top: 12px;
     &.fullscreen {
-      right:55px;
+      right: 55px;
     }
   }
-  &.d2p-drag-dialog{
-    .is-fullscreen{
-      left:0px !important;
-      top:0px !important;
-      .el-dialog__header{
+  &.d2p-drag-dialog {
+    .is-fullscreen {
+      left: 0px !important;
+      top: 0px !important;
+      .el-dialog__header {
         cursor: auto !important;
       }
     }

@@ -2,7 +2,7 @@
   <el-popover placement="right" v-model="visible">
     <graph
       v-if="visible"
-      :ip="scope.row.receiver_ip_port.substring(0, scope.row.receiver_ip_port.lastIndexOf(':'))"
+      :ip="scope.row.send_ip_port.substring(0, scope.row.send_ip_port.lastIndexOf(':'))"
     />
     <el-link slot="reference" :type="type">{{text}}</el-link>
   </el-popover>

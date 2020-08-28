@@ -1,6 +1,6 @@
 <template>
-  <div style="cursor: pointer"  @click="handleClick">
-      <el-link :type="type">{{text}}</el-link>
+  <div style="cursor: pointer" @click="handleClick">
+    <el-link :type="type">{{text}}</el-link>
   </div>
 </template>
 
@@ -9,35 +9,29 @@ export default {
   props: {
     value: {
       type: Boolean,
-      require: true
+      require: true,
     },
     // 本行的所有数据，此字段不需要额外配置
     scope: {
-      default: null
+      default: null,
     },
     // 通过 component 中 props 字段传过来的数据，此字段需要先在 component 中配置
     myProps: {
-      default: null
-    }
+      default: null,
+    },
   },
   computed: {
-    type () {
-      return this.value ? 'danger':'success'
+    type() {
+      return this.value ? "danger" : "success";
     },
-    text () {
-    //   if (this.scope.$index === 1) {
-    //     return this.myProps
-    //   } else if (this.scope.$index === 3) {
-    //     return '通过scope拿到了当前行日期：' + this.scope.row.date
-    //   }
-    //   return this.value ? '是' : '否'
-        return this.scope.row.receiver_ip_port
-    }
+    text() {
+      return this.scope.row.receiver_ip_port;
+    },
   },
-  methods:{
-    handleClick(evt){
-      this.$emit('click', evt)
-    }
-  }
-}
+  methods: {
+    handleClick(evt) {
+      this.$emit("click", evt);
+    },
+  },
+};
 </script>

@@ -18,14 +18,6 @@
               ></el-transfer>
               <el-button type="text" slot="reference">{{selectRoles}}</el-button>
             </el-popover>
-            <!-- <el-select v-model="userForm.name" placeholder="请选择">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>-->
           </el-form-item>
           <el-form-item
             label="用户名"
@@ -82,12 +74,10 @@
       :loading="loading"
     >
       <template style="width: 200px;" slot="usernameFormSlot" slot-scope="scope">
-        <!-- <el-button @click="test(scope)">{{scope.row}}</el-button> -->
         <el-input clearable v-model="scope.form['username']" placeholder="请输入内容"></el-input>
       </template>
 
       <template slot="rolesFormSlot" slot-scope="scope">
-        <!-- <el-button @click="test(scope)">{{scope.row}}</el-button> -->
         <el-transfer
           size="mini"
           :span="24"
@@ -116,7 +106,6 @@
       :loading="loading"
     >
       <template slot="usernameFormSlot" slot-scope="scope">
-        <!-- <el-button @click="test(scope)">{{scope.row}}</el-button> -->
         <el-input
           style="width: 200px;"
           :disabled="true"
@@ -125,7 +114,6 @@
         ></el-input>
       </template>
       <template slot="rolesFormSlot" slot-scope="scope">
-        <!-- <el-button @click="test(scope)">{{scope.row}}</el-button> -->
         <el-transfer
           size="mini"
           :span="24"
@@ -229,7 +217,6 @@ import { d2CrudPlus } from "d2-crud-plus";
 import { mapState } from "vuex";
 Vue.component("SplitPane", SplitPane);
 export default {
-  // mixins: [d2CrudPlus.crud],
   data() {
     return {
       ruleForm: {
@@ -413,12 +400,10 @@ export default {
             }
           }
         }
-        // console.log(this.mid_data[x]['cAuthority'])
         if (roles === "") roles = "无";
         this.mid_data[x]["roles"] = roles;
         i += 1;
       }
-      // console.log(this.mid_data);
       return this.mid_data;
     },
     transfer_data: function () {
@@ -448,7 +433,6 @@ export default {
           disabled: false,
         });
       }
-      // console.log(result)
       return result;
     },
     selectRoles: function () {
@@ -486,7 +470,6 @@ export default {
       for (var x in this.graph_data) {
         _rawData = _rawData.concat(this.graph_data[x]);
       }
-      // console.log(_rawData)
       var _autoDataZoomAnimator;
 
       const echarts = this.$echarts;
@@ -522,26 +505,6 @@ export default {
               handleSize: "80%",
               showDetail: false,
             },
-            // {
-            //   type: "inside",
-            //   id: "insideX",
-            //   xAxisIndex: 0,
-            //   filterMode: "weakFilter",
-            //   start: 0,
-            //   end: 26,
-            //   zoomOnMouseWheel: false,
-            //   moveOnMouseMove: true,
-            // },
-            // {
-            //   type: "inside",
-            //   id: "insideY",
-            //   yAxisIndex: 0,
-            //   start: 95,
-            //   end: 100,
-            //   zoomOnMouseWheel: false,
-            //   moveOnMouseMove: true,
-            //   moveOnMouseWheel: true,
-            // },
           ],
           grid: {
             show: true,
@@ -622,7 +585,6 @@ export default {
           api.value(DIM_TIME_DEPARTURE),
           categoryIndex,
         ]);
-        // console.log(timeArrival, timeDeparture, categoryIndex)
 
         var coordSys = params.coordSys;
         _cartesianXBounds[0] = coordSys.x;
@@ -631,7 +593,6 @@ export default {
         _cartesianYBounds[1] = coordSys.y + coordSys.height;
 
         var barLength = timeDeparture[0] - timeArrival[0];
-        // Get the heigth corresponds to length 1 on y axis.
         var barHeight = api.size([0, 1])[1] * HEIGHT_RATIO;
         var x = timeArrival[0];
         var y = timeArrival[1] - barHeight;
@@ -649,23 +610,15 @@ export default {
           width: barLength,
           height: barHeight,
         });
-        // var rectVIP = clipRectByRect(params, {
-        //   x: x,
-        //   y: y,
-        //   width: barLength / 2,
-        //   height: barHeight,
-        // });
         var rectText = clipRectByRect(params, {
           x: x,
           y: y,
           width: barLength,
           height: barHeight,
         });
-        // console.log(categoryIndex, index["UserName"])
 
         if (categoryIndex === index["UserName"]) {
           const uname = api.value(4);
-          // console.log(uname)
           if (uname) {
             return {
               type: "group",
@@ -772,12 +725,6 @@ export default {
               shape: rectNormal,
               style: api.style({ fill: "#ddb30b" }), //api.style(),
             },
-            // {
-            //   type: "rect",
-            //   ignore: !rectVIP && !api.value(4),
-            //   shape: rectVIP,
-            //   style: api.style({ fill: "#ddb30b" }),
-            // },
             {
               type: "rect",
               ignore: !rectText,
@@ -851,21 +798,19 @@ export default {
         });
       }
       var res = makeOption();
-      // console.log(res)
       return res;
     },
   },
   mounted() {
     this.fetchData();
     this.fetchRoles();
-    // console.log(this.info)
   },
   methods: {
     changePsd({ index, row }) {
       this.dialogPsd = true;
       this.current_user = row.uuid;
-      this.ruleForm.pass = ''
-      this.ruleForm.checkPass = ''
+      this.ruleForm.pass = "";
+      this.ruleForm.checkPass = "";
     },
     changePsdSub() {
       this.dialogPsd = false;
@@ -934,7 +879,6 @@ export default {
           }
         }
       }
-      // console.log(data, this.graph_data)
     },
     dealUserName(username, time, now) {
       var data = this.graph_data;
@@ -948,17 +892,13 @@ export default {
         }
       } else {
         var pos = data["UserName"].length - 1;
-        // console.log('here', pos)
         if (data["UserName"].length > 0 && data["UserName"][pos].length === 3) {
-          // console.log(data['UserName'][pos])
           data["UserName"][pos].push(time);
           data["UserName"][pos].push(this.unametag ? true : false);
         }
         data["UserName"].push([this.y_index["UserName"], username, time]);
       }
-      // console.log(this.unametag)
       this.unametag = !this.unametag;
-      // console.log(this.unametag)
     },
     dealPsd(password, time, now) {
       var data = this.graph_data;
@@ -981,8 +921,8 @@ export default {
       this.upsdtag = !this.upsdtag;
     },
     information({ index, row }) {
-      this.unametag = false
-      this.upsdtag = false
+      this.unametag = false;
+      this.upsdtag = false;
       var item = {
         uuid: row.uuid,
       };
@@ -993,7 +933,6 @@ export default {
           for (var item in this.graph_data) {
             this.graph_data[item] = [];
           }
-          // console.log(res.data)
           for (var x in res.data) {
             x = res.data[x];
             if (x["opreation"] === "new") {
@@ -1029,12 +968,9 @@ export default {
 
         myChart.setOption(this.options_graph);
         this.graph_chart = myChart;
-        // myChart.setOption(this.options_graph);
         window.addEventListener("resize", function () {
           myChart.resize();
         });
-        // this.myChart = myChart;
-        // console.log(this.myChart)
       }
       this.$on("hook:destroyed", () => {
         window.removeEventListener("resize", function () {
@@ -1101,10 +1037,6 @@ export default {
             }
           });
       }
-      // var length = this.Selection.length;
-      // var count = 0;
-      // for (var x in this.Selection) {
-      // }
     },
     handleSelectionChange(val) {
       this.Selection = val;
@@ -1141,7 +1073,6 @@ export default {
         ...this.pagination,
       })
         .then((res) => {
-          // console.log(res)
           if (res.status === 200) {
             this.mid_data = res.data;
             this.pagination.total = res.size;
@@ -1226,7 +1157,6 @@ export default {
       done();
     },
     handleRowEdit({ index, row }, done) {
-      // console.log(row);
       this.formOptions.saveLoading = true;
       setTimeout(() => {
         this.formOptions.saveLoading = true;
@@ -1271,7 +1201,6 @@ export default {
             }
           })
           .catch((err) => {
-            // console.log('err', err)
             count++;
             if (count === 2) {
               this.fetchData();

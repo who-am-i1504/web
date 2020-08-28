@@ -1,14 +1,5 @@
 <template>
   <d2-container>
-    <!-- <d2-module-index-banner slot="header" v-bind="banner"/> 
-    <d2-module-index-menu :menu="menu"/>-->
-    <!-- <template slot="header" style="margin-bottom: 5px">
-      <template slot="prepend"></template>
-      传输规则数目示意图
-      <template slot="append">.com</template>
-      <el-button slot="header" style="margin-bottom: 5px">自定义按钮1</el-button>
-      <el-button slot="header" type="primary" round style="margin-bottom: 5px">自定义按钮2</el-button>
-    </template>-->
     <template slot="header">
       <div class="d2-page-cover">
         <p class="d2-page-cover__title">传输规则数量饼形图</p>

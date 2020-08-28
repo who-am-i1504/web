@@ -15,7 +15,7 @@
         :key="source"
         :alt="title"
         class="image"
-      >
+      />
     </viewer>
   </div>
 </template>
@@ -39,30 +39,30 @@ export default {
         transition: true,
         fullscreen: true,
         keyboard: true,
-        url: 'data-source'
+        url: "data-source",
       },
       index: 0,
-      images: []
+      images: [],
     };
   },
   methods: {
-    inited (viewer) {
+    inited(viewer) {
       this.$viewer = viewer;
       this.$viewer.view(this.index);
     },
-    view (index) {
-      this.index = index
+    view(index) {
+      this.index = index;
       this.$viewer.view(this.index);
     },
-    show (images, index = 0) {
+    show(images, index = 0) {
       if (this.images === images) {
-        this.view(index)
-        return
+        this.view(index);
+        return;
       }
-      this.images = images
-      this.index = index
-    }
-  }
+      this.images = images;
+      this.index = index;
+    },
+  },
 };
 </script>
 
@@ -74,6 +74,6 @@ export default {
 </style>
 <style>
 .viewer-loading > img {
-  display: none;  /* hide big images when it is loading */
+  display: none; /* hide big images when it is loading */
 }
 </style>

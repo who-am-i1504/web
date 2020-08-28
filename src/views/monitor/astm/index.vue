@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
       <div style="margin: -16px;" class="panel-search">
         <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">
@@ -55,6 +55,11 @@
           </el-button>
         </el-popover>
       </el-form-item>
+      <el-form-item v-if="info.authority && (info.authority & 2)">
+        <el-button style="width: 100%;" type="danger" @click="deleteBatch">
+          <d2-icon name="warning" />删除
+        </el-button>
+      </el-form-item>
     </el-form>
     <d2-crud
       style="margin: -20px;"
@@ -87,11 +92,8 @@
       </template>
       <template slot="expandSlot" slot-scope="scope">
         <el-input type="textarea" placeholder="内容" :rows="5" v-model="scope.row.content"></el-input>
-        <!-- <div> -->
-        <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
         <el-form slot="paneL" ref="form" :model="scope.row" :fullscreen="true">
           <el-row>
-            <!-- <el-col :span="4"> -->
             <template v-for="(key, index) in list">
               <el-col :span="12">
                 <el-form-item :label="list_name[index]">
@@ -99,16 +101,11 @@
                 </el-form-item>
               </el-col>
             </template>
-            <!-- </el-col> -->
             <el-col :span="4">
               <image slot="paneR" :value="scope.row['image_path']" />
             </el-col>
           </el-row>
-          <!-- <slot name="FormBodyAppendSlot" :form="scope.row" /> -->
         </el-form>
-
-        <!-- </SplitPane> -->
-        <!-- </div> -->
       </template>
     </d2-crud>
     <el-card style="margin: -10px;" slot="footer">
@@ -134,9 +131,16 @@
         :class="{'d2-crud-dialog':true}"
       >
         <template slot="title">
-        关系网络图
-        <slot name="FormHeaderSlot" />
-        <button v-if="dialogOptions.fullscreen!=null" type="button"  class="el-dialog__headerbtn fullscreen" @click="dialogOptions.fullscreen = !dialogOptions.fullscreen" ><i class="el-dialog__close el-icon el-icon-full-screen"></i></button>
+          关系网络图
+          <slot name="FormHeaderSlot" />
+          <button
+            v-if="dialogOptions.fullscreen!=null"
+            type="button"
+            class="el-dialog__headerbtn fullscreen"
+            @click="dialogOptions.fullscreen = !dialogOptions.fullscreen"
+          >
+            <i class="el-dialog__close el-icon el-icon-full-screen"></i>
+          </button>
         </template>
 
         <div ref="chart" style="width:100%;height:70vh;"></div>
@@ -149,25 +153,25 @@
 </template>
 
 <script>
-// import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
-import { getMonitorASTM, ASTMGraph } from "@api/monitor";
+import {AstmDelete} from '@/api/collect.data';
+import { getMonitorASTM, ASTMGraph } from "@/api/monitor";
 import Vue from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
 import { getAstmDataById } from "@/api/medical.data";
 Vue.component("SplitPane", SplitPane);
 export default {
-  components:{
+  components: {
     sendCell,
-    receiverCell
+    receiverCell,
   },
   data() {
     return {
       content: "",
-      dialogOptions:{
-        fullscreen:false
+      dialogOptions: {
+        fullscreen: false,
       },
       dialogVisible: false,
       currentTableData: [],
@@ -183,65 +187,35 @@ export default {
           key: "order",
           align: "center",
           width: 90,
-          showOverflowTooltip: true
+          showOverflowTooltip: true,
         },
-        // {
-        //   title: '类型',
-        //   key: 'type',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
         {
           title: "发送方IP地址及端口号",
           key: "sender_tag",
           align: "center",
           showOverflowTooltip: true,
-          // component: {
-          //   name: sendCell
-          // }
           rowSlot: true,
         },
-        // {
-        //   title:'发送方',
-        //   key:'sender',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
         {
           title: "接收方IP地址及端口号",
           key: "receiver_tag",
           align: "center",
           showOverflowTooltip: true,
-          // component: {
-          //   name: receiverCell
-          // }
           rowSlot: true,
         },
-        // {
-        //   title:'接收方',
-        //   key:'receiver',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
         {
           title: "发送时间",
           key: "message_time",
           align: "center",
-          showOverflowTooltip: true
+          showOverflowTooltip: true,
         },
-        // {
-        //   title:'版本号',
-        //   key:'version',
-        //   align:'center',
-        //   showOverflowTooltip:true
-        // },
         {
           title: "数据大小",
           key: "size",
           width: 90,
           align: "center",
-          showOverflowTooltip: true
-        }
+          showOverflowTooltip: true,
+        },
       ],
       downloadColumns: [
         { label: "序号", prop: "order" },
@@ -254,7 +228,7 @@ export default {
         { label: "详细内容", prop: "content1" },
         { label: "发送方", prop: "sender" },
         { label: "接收方", prop: "receiver" },
-        { label: "ID", prop: "id" }
+        { label: "ID", prop: "id" },
       ],
       mid_data: [],
       loading: false,
@@ -263,16 +237,16 @@ export default {
         pageSize: 20,
         total: 0,
         pageCount: 9,
-        layout: "prev, pager, next, jumper, ->, total, slot"
+        layout: "prev, pager, next, jumper, ->, total, slot",
       },
       formOptions: {
         saveButtonIcon: "el-icon-edit",
         saveButtonText: "修改",
-        saveLoading: false
+        saveLoading: false,
       },
       options: {
         size: "mini",
-        stripe: true
+        stripe: true,
       },
       searching: false,
       searchRequest: {},
@@ -290,7 +264,7 @@ export default {
         "seqnumber",
         "size",
         "version",
-        "message_time"
+        "message_time",
       ],
       list_name: [
         "发送方名称",
@@ -306,7 +280,7 @@ export default {
         "消息序列号",
         "消息大小",
         "消息版本",
-        "消息发送时间"
+        "消息发送时间",
       ],
       webkitDep: {
         type: "force",
@@ -337,12 +311,13 @@ export default {
     };
   },
   watch: {
-    pagination: function(value) {
+    pagination: function (value) {
       this.handleSet("pagination", value);
-    }
+    },
   },
   computed: {
-    data: function() {
+    ...mapState("d2admin/user", ["info"]),
+    data: function () {
       var x;
       var i = 1;
       for (x in this.mid_data) {
@@ -352,17 +327,17 @@ export default {
       }
       return this.mid_data;
     },
-    whichShow: function() {
+    whichShow: function () {
       return !this.searching;
     },
     options_graph: function () {
       const webkitDep = this.webkitDep;
       return {
         title: {
-            text: 'ASTM局部网络结构',
-            subtext: 'Default layout',
-            top: 'bottom',
-            left: 'right'
+          text: "ASTM局部网络结构",
+          subtext: "Default layout",
+          top: "bottom",
+          left: "right",
         },
         legend: {
           data: webkitDep.categories,
@@ -379,7 +354,7 @@ export default {
             draggable: true,
             roam: true,
             focusNodeAdjacency: true,
-            edgeSymbol: ['', 'arrow'],
+            edgeSymbol: ["", "arrow"],
             data: webkitDep.nodes.map(function (node, idx) {
               return {
                 symbolSize: node.size,
@@ -393,7 +368,6 @@ export default {
             force: {
               edgeLength: 100,
               repulsion: 200,
-              // gravity: 0.2,
             },
             edges: webkitDep.links,
           },
@@ -440,8 +414,8 @@ export default {
                   size: this.nodeSize[depth],
                 });
                 this.nodes[src] = index - 1;
-                if (depth == 2){
-                  this.count += 1
+                if (depth == 2) {
+                  this.count += 1;
                 }
                 this.getASTMIP(src, depth + 1);
               }
@@ -453,26 +427,23 @@ export default {
                   size: this.nodeSize[depth],
                 });
                 this.nodes[dst] = index - 1;
-                if (depth == 2){
-                  this.count += 1
+                if (depth == 2) {
+                  this.count += 1;
                 }
                 this.getASTMIP(dst, depth + 1);
               }
-              // console.log(this.webkitDep,src, dst)
               this.webkitDep.links.push({
                 source: this.nodes[src],
                 target: this.nodes[dst],
               });
             }
             if (depth === 2) {
-              // this.count = res.data.length;
             } else if (depth === 3) {
               this.midCount += 1;
               if (this.midCount === this.count) {
                 this.getASTMGrapth();
               }
             }
-            // console.log(200,this.count, this.midCount)
           } else {
             if (depth === 3) {
               this.midCount += 1;
@@ -480,7 +451,6 @@ export default {
                 this.getASTMGrapth();
               }
             }
-            //  console.log( 'others',this.count, this.midCount)
           }
         })
         .catch((err) => {
@@ -490,22 +460,17 @@ export default {
               this.getASTMGrapth();
             }
           }
-           console.log('error',this.count, this.midCount)
+          //  console.log('error',this.count, this.midCount)
         });
     },
     getASTMGrapth() {
-      // console.log('here')
-      // console.log(this.myChart)
       if (this.myChart === "") {
-        // this.initASTMGrapth()
       } else {
         this.myChart.dispose();
       }
       this.initASTMGrapth();
-      // this.myChart.setOption(this.options_graph)
     },
     initASTMGrapth() {
-      // console.log('init')
       const chart = this.$refs.chart;
       if (chart) {
         const myChart = this.$echarts.init(chart);
@@ -514,7 +479,6 @@ export default {
           myChart.resize();
         };
         this.myChart = myChart;
-        // console.log(this.myChart)
       }
       this.$on("hook:destroyed", () => {
         window.removeEventListener("resize", function () {
@@ -541,14 +505,14 @@ export default {
         }
       }
       getMonitorASTM({
-        ...para
+        ...para,
       })
-        .then(res => {
+        .then((res) => {
           this.mid_data = res.data;
           this.pagination.total = res.size;
           this.loading = false;
         })
-        .catch(err => {
+        .catch((err) => {
           this.loading = false;
         });
     },
@@ -569,10 +533,6 @@ export default {
       this.fetchData();
     },
     doubleClick(row, event) {
-      // this.$refs.d2Crud.showDialog({
-      //   mode:'edit',
-      //   rowIndex : row.order - (this.pagination.page - 1)*this.pagination.pageSize  - 1
-      // })
       this.content =
         "<strong>" + row.content.replace(/\n/g, "<br><br>") + "</strong>";
       this.dialogVisible = true;
@@ -590,7 +550,7 @@ export default {
       if (this.inputStr2 === "") {
         this.$message({
           message: "您的IP地址输入框输入为空",
-          type: "warning"
+          type: "warning",
         });
         return;
       } else {
@@ -607,7 +567,7 @@ export default {
             message:
               "<strong>主要有以下几种形式:</strong><br><i>ip    127.0.0.1</i><br><i>ip:     127.0.0.1:</i><br><i>ip:port     127.0.0.1:8080</i><br><i>:port     :8080</i>",
             type: "warining",
-            dangerouslyUseHTMLString: true
+            dangerouslyUseHTMLString: true,
           });
           return;
         }
@@ -626,13 +586,13 @@ export default {
             }
             this.$message({
               message: "端口号取整出现问题",
-              type: "warning"
+              type: "warning",
             });
             return;
           } else {
             this.$message({
               message: "其他错误",
-              type: "warning"
+              type: "warning",
             });
             return;
           }
@@ -646,8 +606,8 @@ export default {
       this.multipleSelection = val;
     },
     downloadDataTranslate(data) {
-      return data.map(row => ({
-        ...row
+      return data.map((row) => ({
+        ...row,
       }));
     },
     handleDownloadXlsx(data) {
@@ -655,7 +615,7 @@ export default {
         .excel({
           title: "Astm部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -666,7 +626,7 @@ export default {
         .csv({
           title: "Astm部分数据",
           columns: this.downloadColumns,
-          data: this.downloadDataTranslate(data)
+          data: this.downloadDataTranslate(data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -674,10 +634,10 @@ export default {
     },
     downloadAllDataTranslate(data) {
       var num = 0;
-      return data.map(row => ({
+      return data.map((row) => ({
         ...row,
         order: (num += 1),
-        content1: row.content.replace(/\n/g, " ")
+        content1: row.content.replace(/\n/g, " "),
       }));
     },
     exportExecl(execl_columns, execl_data) {
@@ -685,7 +645,7 @@ export default {
         .excel({
           title: "Astm数据概述",
           columns: execl_columns,
-          data: this.downloadAllDataTranslate(execl_data)
+          data: this.downloadAllDataTranslate(execl_data),
         })
         .then(() => {
           this.$message("导出表格成功");
@@ -696,7 +656,7 @@ export default {
         .csv({
           title: "Astm数据概述",
           columns: cvs_columns,
-          data: this.downloadAllDataTranslate(cvs_data)
+          data: this.downloadAllDataTranslate(cvs_data),
         })
         .then(() => {
           this.$message("导出CSV成功");
@@ -705,7 +665,7 @@ export default {
     handleDownloadAllXlsx() {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -715,23 +675,23 @@ export default {
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
             AstmCollect({
-              ...params
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportExecl(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           } else {
@@ -739,23 +699,23 @@ export default {
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
             AstmSearch({
-              ...params
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportExecl(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           }
@@ -767,7 +727,7 @@ export default {
     handleDownloadAllCsv(data) {
       if (this.pagination.total > 10000) {
         this.$notify({
-          message: "下载数据量过大，需要一些时间"
+          message: "下载数据量过大，需要一些时间",
         });
       }
       setTimeout(() => {
@@ -775,26 +735,26 @@ export default {
           if (this.whichShow) {
             var params = {
               pageSize: this.pagination.total,
-              page: 1
+              page: 1,
             };
             AstmCollect({
-              ...params
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 if (res.status === 200) {
                   this.currentTableData = res.data;
                   this.exportCvs(this.downloadColumns, res.data);
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warining"
+                    type: "warining",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           } else {
@@ -802,9 +762,9 @@ export default {
             params["pageSize"] = this.pagination.total;
             params["page"] = 1;
             AstmSearch({
-              ...params
+              ...params,
             })
-              .then(res => {
+              .then((res) => {
                 this.loading = false;
                 if (res.status === 200) {
                   this.currentTableData = res.data;
@@ -812,15 +772,15 @@ export default {
                 } else {
                   this.$message({
                     message: res.message,
-                    type: "warning"
+                    type: "warning",
                   });
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 this.loading = false;
                 this.$message({
                   message: "网络错误",
-                  type: "error"
+                  type: "error",
                 });
               });
           }
@@ -828,8 +788,51 @@ export default {
           this.exportCvs(this.downloadColumns, this.currentTableData);
         }
       }, 300);
-    }
-  }
+    },
+    deleteBatch() {
+      var length = this.multipleSelection.length;
+      var count = 0;
+      var success = 0;
+      for (var x in this.multipleSelection) {
+        var req = {};
+        req["id"] = this.multipleSelection[x]["id"];
+        AstmDelete({
+          ...req,
+        })
+          .then((res) => {
+            count += 1;
+            if (res.status === 200) {
+              success += 1;
+            }
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -848,19 +851,19 @@ export default {
   @extend %unable-select;
   align-items: center;
 }
-.d2-crud-dialog{
-  .el-dialog__headerbtn{
-    padding:10px;
-    top:12px;
+.d2-crud-dialog {
+  .el-dialog__headerbtn {
+    padding: 10px;
+    top: 12px;
     &.fullscreen {
-      right:55px;
+      right: 55px;
     }
   }
-  &.d2p-drag-dialog{
-    .is-fullscreen{
-      left:0px !important;
-      top:0px !important;
-      .el-dialog__header{
+  &.d2p-drag-dialog {
+    .is-fullscreen {
+      left: 0px !important;
+      top: 0px !important;
+      .el-dialog__header {
         cursor: auto !important;
       }
     }

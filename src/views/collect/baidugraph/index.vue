@@ -58,9 +58,7 @@ export default {
   created: function () {
     // this.createMap()
   },
-  mounted() {
-    this.getPoint();
-  },
+  mounted() {},
   watch: {
     // value(val){
     //   this.ip = val
@@ -90,6 +88,7 @@ export default {
       // bmap.addControl(navi3DCtrl)
       bmap.addControl(scaleCtrl);
       this.bmap = bmap;
+      this.getPoint();
       // this.getPoint();
     },
     getPoint() {

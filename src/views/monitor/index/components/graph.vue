@@ -1,54 +1,20 @@
 <template>
-  <!-- <d2-container> -->
-    <!-- <d2-module-index-banner slot="header" v-bind="banner"/> 
-    <d2-module-index-menu :menu="menu"/>-->
-    <!-- <template slot="header" style="margin-bottom: 5px">
-      <template slot="prepend"></template>
-      传输规则数目示意图
-      <template slot="append">.com</template>
-      <el-button slot="header" style="margin-bottom: 5px">自定义按钮1</el-button>
-      <el-button slot="header" type="primary" round style="margin-bottom: 5px">自定义按钮2</el-button>
-    </template>-->
-    <!-- <template slot="header">
-      <div class="d2-page-cover">
-        <p class="d2-page-cover__title">疑似医疗数据传输泄露概述</p>
-      </div>
-    </template> -->
-
-    <div class="page">
-      <el-carousel class="d2-page-cover1" height="100%" trigger="click">
-        <el-carousel-item>
-          <!-- <el-card> -->
-          <!-- <div class="inner">
-              <ve-ring :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-ring>
-          </div>-->
-          <!-- </el-card> -->
-          <div ref="allchart" style="width:100%;height:100%" />
-        </el-carousel-item>
-        <el-carousel-item>
-          <div ref="hl7chart" style="width:100%; height:100%"></div>
-        </el-carousel-item>
-        <el-carousel-item>
-          <div ref="dicomchart" style="width:100%; height:100%"></div>
-        </el-carousel-item>
-        <el-carousel-item>
-          <div ref="astmchart" style="width:100%; height:100%"></div>
-        </el-carousel-item>
-      </el-carousel>
-    </div>
-    <!-- <el-card style="margin: -20px; height:400px">
-      
-    </el-card>
-    <el-card style="margin: -20px; height:400px">
-      
-    </el-card>
-    <el-card style="margin: -20px; height:400px">
-      
-    </el-card>
-    <el-card style="margin: -20px; height:400px">
-      
-    </el-card>-->
-  <!-- </d2-container> -->
+  <div class="page">
+    <el-carousel class="d2-page-cover1" height="100%" trigger="click">
+      <el-carousel-item>
+        <div ref="allchart" style="width:100%;height:100%" />
+      </el-carousel-item>
+      <el-carousel-item>
+        <div ref="hl7chart" style="width:100%; height:100%"></div>
+      </el-carousel-item>
+      <el-carousel-item>
+        <div ref="dicomchart" style="width:100%; height:100%"></div>
+      </el-carousel-item>
+      <el-carousel-item>
+        <div ref="astmchart" style="width:100%; height:100%"></div>
+      </el-carousel-item>
+    </el-carousel>
+  </div>
 </template>
 
 <script>
@@ -64,33 +30,12 @@ import {
 export default {
   mixins: [list],
   data() {
-    // this.chartSettings = {
-    //   radius: 150,
-    //   offsetY: 250
-    // }
     return {
       menu,
-      // banner: {
-      //   title: "HL7规则管理",
-      //   subTitle: "在这里可以进行HL7规则的添加,删除,更改等功能",
-      // },
-      chartSettings: {
-        // radius: 150,
-        // offsetY:250,
-        // label:'传输规则数目示意图'
-        // roseType: 'radius'
-      },
+      chartSettings: {},
       chartData: {
         columns: ["协议类型", "数量"],
-        // columns: ['日期', '访问用户'],
-        rows: [
-          // { '日期': '1/1', '访问用户': 1393 },
-          // { '日期': '1/2', '访问用户': 3530 },
-          // { '日期': '1/3', '访问用户': 2923 },
-          // { '日期': '1/4', '访问用户': 1723 },
-          // { '日期': '1/5', '访问用户': 3792 },
-          // { '日期': '1/6', '访问用户': 4593 }
-        ],
+        rows: [],
       },
       webkitDep: {
         type: "force",
@@ -132,9 +77,6 @@ export default {
           formatter: "{a} <br/>{b}: {c} ({d}%)",
         },
         legend: {
-          // orient: "vertical",
-          // top:100,
-          // left: 100,
           data: columns,
         },
         series: [
@@ -174,13 +116,11 @@ export default {
     options(webkitDep) {
       return {
         title: {
-          // subtext: 'Default layout',
           top: "top",
           left: "right",
         },
         legend: {
           data: webkitDep.categories,
-          // top: 'bottom',
         },
         series: [
           {
@@ -194,7 +134,7 @@ export default {
             draggable: true,
             roam: true,
             focusNodeAdjacency: true,
-            edgeSymbol: ['', 'arrow'],
+            edgeSymbol: ["", "arrow"],
             data: webkitDep.nodes.map(function (node, idx) {
               return {
                 symbolSize: node.size,
@@ -208,7 +148,6 @@ export default {
             force: {
               edgeLength: 100,
               repulsion: 100,
-              // gravity: 0.5,
             },
             edges: webkitDep.links,
           },
@@ -439,7 +378,6 @@ export default {
             if (chart) {
               const myChart = this.$echarts.init(chart);
               const option = this.all_options;
-              // option.title["text"] = "";
               myChart.setOption(option);
               window.addEventListener("resize", function () {
                 myChart.resize();

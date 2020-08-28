@@ -1,5 +1,5 @@
 <template>
-  <d2-container :type="containerType" :scroll-delay="scrollDelay" >
+  <d2-container :type="containerType" :scroll-delay="scrollDelay">
     <template slot="header">
       <div style="margin: -16px;" class="panel-search">
         <el-input class="panel-search__input" placeholder="IP地址" v-model="inputStr2">
@@ -55,6 +55,16 @@
           </el-button>
         </el-popover>
       </el-form-item>
+      <el-form-item v-if="info.authority && (info.authority & 2)">
+        <el-button style="width: 100%;" type="danger" @click="deleteBatch">
+          <d2-icon name="warning" />删除
+        </el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button style="width: 100%;" @click="downloadBatch">
+          <d2-icon name="download" />图片批量下载
+        </el-button>
+      </el-form-item>
     </el-form>
     <d2-crud
       style="margin: -20px;"
@@ -85,16 +95,11 @@
         ></receiver-cell>
       </template>
       <template slot="image_pathSlot" slot-scope="scope">
-        <!-- <div> -->
         <image-tag :value="scope.row.image_path" @click="doubleClick(scope.row)" />
-        <!-- </div> -->
       </template>
       <template slot="expandSlot" slot-scope="scope">
-        <!-- <div> -->
-        <!-- <SplitPane :min-percent='10' :default-percent='50' split="vertical"> -->
         <el-form slot="paneL" ref="form" :model="scope.row" :fullscreen="true">
           <el-row>
-            <!-- <el-col :span="4"> -->
             <template v-for="(key, index) in list">
               <el-col :span="12">
                 <el-form-item :label="list_name[index]">
@@ -102,16 +107,11 @@
                 </el-form-item>
               </el-col>
             </template>
-            <!-- </el-col> -->
             <el-col :span="4">
               <image slot="paneR" :value="scope.row['image_path']" />
             </el-col>
           </el-row>
-          <!-- <slot name="FormBodyAppendSlot" :form="scope.row" /> -->
         </el-form>
-
-        <!-- </SplitPane> -->
-        <!-- </div> -->
       </template>
     </d2-crud>
     <el-card style="margin: -10px;" slot="footer">
@@ -155,56 +155,23 @@
         </span>
       </el-dialog>
     </el-card>
-    <!-- <el-dialog
-      :append-to-body="true"
-      title="详情"
-      :lock-scroll="true"
-      :modal="false"
-      :visible.sync="dialogVisible"
-      width="60%"
-      height="60%"
-      :before-close="handleClose">
-        <el-container style="height:300px;">
-          <el-main>
-            <el-form
-              :model="formData"
-            >
-              <div v-for="(value, key, index) in formData" :key="index">
-                <el-form-item
-                  v-if="handleFormTemplateMode(key) === undefine ? false:true"
-                  :label="handleFormTemplateMode(key).title"
-                  :prop="key"
-                >
-
-                </el-form-item>
-              </div>
-            </el-form>
-          </el-main>
-        </el-container>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>-->
     <img-viewer ref="viewer" />
   </d2-container>
 </template>
 
 <script>
-// import { AstmCollect, AstmDetail, AstmSearch } from '@api/collect.data'
-import { getMonitorDICOM, DICOMGraph } from "@api/monitor";
+import {DICOMDelete} from '@/api/collect.data'
+import { getMonitorDICOM, DICOMGraph } from "@/api/monitor";
 import Vue from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
 import ImageTag from "./component/image";
 import ImgViewer from "./component/ImgViewer";
-import {pictureBatchDown, pictureDown} from '@/api/filedownload'
-// import {d2CrudPlus} from 'd2-crud-plus'
+import { pictureBatchDown, pictureDown } from "@/api/filedownload";
 Vue.component("SplitPane", SplitPane);
 export default {
-  // mixins:[d2CrudPlus.crud],
   data() {
     return {
       dialogOptions: {
@@ -235,10 +202,6 @@ export default {
           align: "center",
           showOverflowTooltip: true,
           sortable: true,
-          // component: {
-          //   name: sendCell,
-          //   disabled: false
-          // }
           rowSlot: true,
         },
         {
@@ -247,10 +210,6 @@ export default {
           showOverflowTooltip: true,
           align: "center",
           sortable: true,
-          // showOverflowTooltip: true,
-          // component: {
-          //   name: receiverCell
-          // }
           rowSlot: true,
         },
         {
@@ -263,7 +222,6 @@ export default {
         {
           title: "数据大小",
           key: "size",
-          // width: 100,
           sortable: true,
           align: "center",
           showOverflowTooltip: true,
@@ -275,20 +233,10 @@ export default {
           type: "datetime",
           width: 90,
           rowSlot: true,
-          // component: {
-          //   name: image
-          // }
         },
       ],
       rowHandle: {
         custom: [
-          // {
-          //   icon: 'el-icon-edit',
-          //   text: '详情',
-          //   size: 'small',
-          //   fixed: 'right',
-          //   emit: 'custom-emit-1'
-          // },
           {
             icon: "el-icon-download",
             text: "图片下载",
@@ -425,6 +373,7 @@ export default {
     },
   },
   computed: {
+    ...mapState("d2admin/user", ["info"]),
     data: function () {
       var x;
       var i = 1;
@@ -450,15 +399,19 @@ export default {
         }
         if (this.mid_data[x]["image_path"] !== undefined) {
           this.images.push({
-            thumbnail: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
-            source: process.env.VUE_APP_API + "/picture/show/" + this.mid_data[x]["image_path"],
+            thumbnail:
+              process.env.VUE_APP_API +
+              "/picture/show/" +
+              this.mid_data[x]["image_path"],
+            source:
+              process.env.VUE_APP_API +
+              "/picture/show/" +
+              this.mid_data[x]["image_path"],
             title: this.mid_data[x]["order"],
           });
         }
         i += 1;
       }
-      // console.log
-      // console.log(this.images)
       return this.mid_data;
     },
     whichShow: function () {
@@ -498,7 +451,7 @@ export default {
             draggable: true,
             roam: true,
             focusNodeAdjacency: true,
-            edgeSymbol: ['', 'arrow'],
+            edgeSymbol: ["", "arrow"],
             data: webkitDep.nodes.map(function (node, idx) {
               return {
                 symbolSize: node.size,
@@ -642,25 +595,8 @@ export default {
       });
     },
     downloadPicture({ index, row }) {
-      pictureDown(row.image_path)
-      // axios({
-      //   url: process.env.VUE_APP_API + "/picture/download/" + row.image_path,
-      //   method: "get",
-      //   headers:{
-      //     'Access-Control-Allow-Origin':'*'
-      //   },
-      //   responseType:'blob'
-      // }).then(res => {
-      //   // this.downloadFile(res);
-      //   const fileName = res.headers["content-disposition"].match(/filename=(.*)/)[1]
-        
-      //   FileDownload(res.data, fileName);
-      // });
+      pictureDown(row.image_path);
     },
-    // showCurdDialog({index, row}){
-    //   this.$refs.dialogMyself.handleFormData(row)
-    //   this.dialogVisible = true
-    // },
     handleClose(done) {
       done();
     },
@@ -708,25 +644,11 @@ export default {
       this.fetchData();
     },
     doubleClick(row) {
-      // this.$refs.d2Crud.showDialog({
-      //   mode:'edit',
-      //   rowIndex : row.order - (this.pagination.page - 1)*this.pagination.pageSize  - 1
-      // })
-      // this.content = '<strong>' + row.content.replace(/\n/g, '<br><br>') + '</strong>'
-      // this.dialogVisible = true
       this.$refs.viewer.show(
         this.images,
         row.order - (this.pagination.page - 1) * this.pagination.pageSize - 1
-        // Math.floor(Math.random() * 10)
       );
     },
-    // handleDialogCancel(done) {
-    //   done();
-    // },
-    // handleRowEdit({ index, row }, done) {
-    //   this.formOptions.saveLoading = true;
-    //   setTimeout(() => {}, 300);
-    // },
     searchItemInForm() {
       this.searching = false;
       var newRow = {};
@@ -978,12 +900,55 @@ export default {
         req.push(this.multipleSelection[x]["image_path"]);
       }
       if (req.length === 0) return;
-      var para = {}
-      para['pictures'] = req
+      var para = {};
+      para["pictures"] = req;
       pictureBatchDown({
-        ...para
-      })
-    }
+        ...para,
+      });
+    },
+    deleteBatch() {
+      var length = this.multipleSelection.length;
+      var count = 0;
+      var success = 0;
+      for (var x in this.multipleSelection) {
+        var req = {};
+        req["id"] = this.multipleSelection[x]["id"];
+        DICOMDelete({
+          ...req,
+        })
+          .then((res) => {
+            count += 1;
+            if (res.status === 200) {
+              success += 1;
+            }
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          })
+          .catch((err) => {
+            count += 1;
+            if (count === length) {
+              this.$message({
+                message:
+                  "删除成功" +
+                  String(success) +
+                  "条; 删除失败" +
+                  String(length - success) +
+                  "条。",
+                type: "success",
+              });
+            }
+          });
+      }
+    },
   },
 };
 </script>

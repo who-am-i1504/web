@@ -159,11 +159,10 @@
 import menu from "@/menu/modules/demo-playground";
 import { HL7Collect, HL7Detail, HL7Search, HL7Delete } from "@api/collect.data";
 import Vue from "vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import SplitPane from "vue-splitpane";
 import sendCell from "./component/sendCell";
 import receiverCell from "./component/receiverCell";
-import { mapState } from "vuex";
 Vue.component("SplitPane", SplitPane);
 export default {
   data() {

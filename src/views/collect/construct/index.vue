@@ -20,7 +20,7 @@
               :on-exceed="removeFile"
               accept=".pcap"
               :show-file-list="true"
-              action="/construct/upload"
+              :action="url"
               :before-remove="deletePreFile"
             >
               <!-- multiple -->
@@ -31,6 +31,8 @@
               </div>
               <!-- <div class="el-upload__tip" slot="tip">只能上传pcap文件</div> -->
             </el-upload>
+            <br/>
+            <br/>
             <el-checkbox-group v-model="cons_type">
               <el-checkbox-button v-for="t in types" :label="t" :key="t">{{t}}</el-checkbox-button>
             </el-checkbox-group>
@@ -42,6 +44,7 @@
         <el-col :span="14">
           <div>
             <d2-crud-x
+              v-if="data.length>0"
               :loading="loading"
               ref="d2Crud"
               @download="download"
@@ -50,28 +53,10 @@
               :options="options"
               :rowHandle="rowHandle"
             />
-            <!-- <SplitPane
-            style="width:100%; height:25vh;"
-            :min-percent="10"
-            :default-percent="80"
-            split="vertical"
-          >
-          <div slot="paneL">
-          </div>
-          <div slot="paneR">
-          </div>
-            </SplitPane>-->
           </div>
         </el-col>
       </el-row>
     </div>
-    <!-- </template> -->
-
-    <!-- </div> -->
-    <!-- <template slot="paneR">
-        <div>woshiasdfasdf</div>
-    </template>-->
-    <!-- </SplitPane> -->
   </d2-container>
 </template>
 
@@ -87,12 +72,12 @@ import request from "@/plugin/axiosfile";
 import { d2CrudPlus } from "d2-crud-plus";
 import { pcapBatchDown, pcapDown } from "@/api/filedownload";
 export default {
-  // mixins: [d2CrudPlus.crud],
   components: {
     d2CrudX,
   },
   data() {
     return {
+      url: process.env.VUE_APP_API + '/construct/upload',
       loading: false,
       options: {
         height: "70vh",
@@ -121,6 +106,10 @@ export default {
           title: "文件名称",
           key: "name",
           treeNode: true,
+        },
+        {
+          title:'文件大小',
+          key:'size',
         },
         {
           title: "文件类型",
@@ -172,17 +161,17 @@ export default {
   },
   created() {
     const token = util.cookies.get("token");
-    // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
     this.headers["X-Token"] = token;
     var req = {};
     deleteBySessionId({
       ...req,
     });
   },
-  watch: {
-    // directorys:function(n, o){
-    //   this.crud.doRefresh()
-    // }
+  beforeDestroy(){
+    var req = {};
+    deleteBySessionId({
+      ...req,
+    });
   },
   computed: {
     fileList: function () {
@@ -195,6 +184,9 @@ export default {
         var pre = item["name"];
         item["id"] = count;
         count++;
+        if (item["size"] === undefined){
+          item["size"] = ''
+        }
         if (item["children"] === undefined) {
           continue;
         } else {
@@ -206,7 +198,7 @@ export default {
           }
         }
       }
-      // console.log(this.directorys);
+      // console.log(this.directorys)
       return this.directorys;
     },
   },
@@ -217,28 +209,10 @@ export default {
         pcapBatchDown({
           dirname: row.name,
         });
-        // request({
-        //   url: "/construct/downDirectory",
-        //   method: "post",
-        //   data: {
-        //     dirname: row.name,
-        //   },
-        // }).then((res) => {
-        //   this.downloadFile(res);
-        // });
       } else {
-        pcapBatchDown({
+        pcapDown({
           filename: row.path,
         });
-        // request({
-        //   url: "/construct/downfile",
-        //   method: "post",
-        //   data: {
-        //     filename: row.path,
-        //   },
-        // }).then((res) => {
-        //   this.downloadFile(res);
-        // });
       }
     },
     downloadFile(response) {
@@ -246,42 +220,7 @@ export default {
       if (!response.data) {
         return;
       }
-      // let url = window.URL.createObjectURL(new Blob([response.data]));
-      // let link = document.createElement("a");
-      // link.style.display = "none";
-      // link.href = url;
-      // link.setAttribute(
-      //   "download",
-      //   response.headers["content-disposition"].match(/filename=(.*)/)[1]
-      // );
-
-      // document.body.appendChild(link);
-      // link.click();
     },
-    // pageRequest(query) {
-    //   var p = new Promise(function (resolve, reject) {
-    //     setTimeout(function () {
-    //       resolve("成功!"); //代码正常执行！
-    //     }, 250);
-    //   });
-    //   return p.then(res => {
-    //     return {
-    //       code:0,
-    //       msg:'',
-    //       data:{
-    //         current:1,
-    //         size:this.directorys.length,
-    //         total:this.directorys.length,
-    //         records:this.directorys
-    //       }
-    //     }
-    //   });
-    // },
-    // getCrudOptions() {
-    //   return {
-    //     columns: this.columns,
-    //   };
-    // },
     start() {
       this.directorys = [];
       this.loading = true;
@@ -294,8 +233,6 @@ export default {
         }).then((res) => {
           if (res.status === 200) {
             this.directorys.push(res.data);
-            // res.data['hasChildren'] = true
-            // console.log(this.directorys)
           } else {
             this.$message({
               message: res.message,
@@ -325,28 +262,8 @@ export default {
       return true;
     },
     removeFile(files, fileList) {
-      // console.log(files, files[0])
-      // this.$refs.upload.handleRemove(files[0].raw)
-      // console.log(this.fileList)
-      // this.$refs.upload.clearFiles()
-      // this.$refs.upload.uploadFiles(files)
-      // this.fileList = []
-      // this.fileList.push({
-      //   name:files[0]['name'],
-      //   raw:files[0]
-      // })
-      // console.log(files, fileList)
-      // fileList[0] = {
-      //   name:files[0]['name'],
-      //   raw:files[0]
-      // }
-      // delete fileList[0]
-      // fileList[0] = files
-      // this.$refs.upload.submit();
-      // console.log(files, fileList)
     },
     getFileName(response, file, fileList) {
-      // console.log(response, file, fileList)
       if (response.status === 200) {
         if (this.filename !== undefined) {
           var req = {
@@ -365,7 +282,6 @@ export default {
           });
         }
         this.filename = response.data;
-        // this.$refs.upload.clearFiles()
       } else {
         this.$message({
           message: response.message,

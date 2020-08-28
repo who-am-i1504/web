@@ -1,5 +1,5 @@
 <template>
-  <d2-container >
+  <d2-container>
     <div slot="header">
       <SplitPane
         :min-percent="10"
@@ -187,12 +187,10 @@
 
 <script>
 import { mapState, mapActions, mapMutations } from "vuex";
-// import { crudOptions } from './crud'
-// import { d2CrudPlus } from 'd2-crud-plus'
+import { logDown } from "@/api/filedownload";
 import { get } from "lodash";
 import { getLog, getLogByUUID, getLogByName, deleteLog } from "@/api/log.data";
 export default {
-  // mixins:[d2CrudPlus.crud],
   data() {
     return {
       state: 1,
@@ -441,22 +439,9 @@ export default {
     },
     // 日志上传
     handleUpload() {
-      window.open(
-        "http://10.246.174.203:5000/picture/log/download")
-      // this.uploading = true
-      // this.$notify({
-      //   type: 'info',
-      //   title: '日志上传',
-      //   message: `开始上传${this.log.length}条日志`
-      // })
-      // setTimeout(() => {
-      //   this.uploading = false
-      //   this.$notify({
-      //     type: 'success',
-      //     title: '日志上传',
-      //     message: '上传成功'
-      //   })
-      // }, 3000)
+      logDown();
+      // window.open(
+      //   "http://10.246.174.203:5000/picture/log/download")
     },
   },
 };

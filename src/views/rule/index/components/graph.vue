@@ -1,9 +1,5 @@
 <template>
-  <div ref="rulechart" style="width:100%; height:100%">
-    <!-- <div class="inner">
-      <ve-pie :data="newChartData" :settings="chartSettings" v-bind="pubSetting"></ve-pie>
-    </div> -->
-  </div>  
+  <div ref="rulechart" style="width:100%; height:100%"></div>
 </template>
 
 <script>
@@ -14,10 +10,6 @@ import { getRule } from "@api/demo.business.table.1";
 export default {
   mixins: [list],
   data() {
-    // this.chartSettings = {
-    //   radius: 150,
-    //   offsetY: 250
-    // }
     return {
       menu,
       banner: {
@@ -31,17 +23,9 @@ export default {
       },
       chartData: {
         columns: ["协议类型", "数量"],
-        // columns: ['日期', '访问用户'],
-        rows: [
-          // { '日期': '1/1', '访问用户': 1393 },
-          // { '日期': '1/2', '访问用户': 3530 },
-          // { '日期': '1/3', '访问用户': 2923 },
-          // { '日期': '1/4', '访问用户': 1723 },
-          // { '日期': '1/5', '访问用户': 3792 },
-          // { '日期': '1/6', '访问用户': 4593 }
-        ],
+        rows: [],
       },
-      chart:undefined
+      chart: undefined,
     };
   },
   computed: {
@@ -65,23 +49,16 @@ export default {
         },
         series: [
           {
-            name: "访问来源",
+            name: "规则数量",
             type: "pie",
             radius: "55%",
             center: ["50%", "60%"],
-            data:this.chartData.rows.map(function (row, idx) {
+            data: this.chartData.rows.map(function (row, idx) {
               return {
-                name: row['协议类型'],
-                value: row['数量'],
+                name: row["协议类型"],
+                value: row["数量"],
               };
             }),
-            // [
-            //   { value: 335, name: "直接访问" },
-            //   { value: 310, name: "邮件营销" },
-            //   { value: 234, name: "联盟广告" },
-            //   { value: 135, name: "视频广告" },
-            //   { value: 1548, name: "搜索引擎" },
-            // ],
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
@@ -121,10 +98,10 @@ export default {
       })
         .then((res) => {
           this.chartData.rows = res.data;
-          if (this.chart){
+          if (this.chart) {
             this.chart.dispose();
           }
-          this.getGrapth()
+          this.getGrapth();
           if (res.status != 200) {
             this.$message({
               message: res.message,
